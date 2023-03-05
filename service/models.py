@@ -36,7 +36,7 @@ class Recommendation(db.Model):
     type = db.Column(db.Integer)
 
     def __repr__(self):
-        return f"<Recommendation {self.name} id=[{self.id}]>"
+        return f"<Recommendation id=[{self.id}] ({self.pid} - {self.recommended_pid})>"
 
     def create(self):
         """
@@ -51,12 +51,12 @@ class Recommendation(db.Model):
         """
         Updates a Recommendation to the database
         """
-        logger.info("Saving %s", self.name)
+        logger.info("Saving recommendation %s (%s - %s)", self.id, self.pid, self.recommended_pid)
         db.session.commit()
 
     def delete(self):
         """ Removes a Recommendation from the data store """
-        logger.info("Deleting %s", self.name)
+        logger.info("Deleting recommendation %s (%s - %s)", self.id, self.pid, self.recommended_pid)
         db.session.delete(self)
         db.session.commit()
 

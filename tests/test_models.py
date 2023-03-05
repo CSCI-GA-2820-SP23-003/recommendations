@@ -12,6 +12,16 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
+################################
+# Util functions for testing
+################################
+def make_recommendation(pid, recommendated_pid, rec_type=0):
+    rec = Recommendation()
+    rec.pid = pid
+    rec.recommended_pid = recommendated_pid
+    rec.type = rec_type
+    return rec
+
 ######################################################################
 #  Recommendation   M O D E L   T E S T   C A S E S
 ######################################################################
@@ -61,10 +71,7 @@ class TestRecommendation(unittest.TestCase):
         """It should Create a Recommendation and add it to the database"""
         recs = Recommendation.all()
         self.assertEqual(recs, [])
-        rec = Recommendation()
-        rec.pid = 10
-        rec.recommended_pid = 20
-        rec.type = 0
+        rec = make_recommendation(10, 20)
         rec.create()
         # Assert that it was assigned an id and shows up in the database
         self.assertIsNotNone(rec.id)
@@ -76,9 +83,7 @@ class TestRecommendation(unittest.TestCase):
         PID_1 = 100
         PID_2 = 200
 
-        rec = Recommendation()
-        rec.pid = PID_1
-        rec.recommended_pid = PID_2
+        rec = make_recommendation(PID_1, PID_2)
         rec.create()
 
         # Read it back
@@ -93,9 +98,7 @@ class TestRecommendation(unittest.TestCase):
         PID_2 = 200
         PID_3 = 300
 
-        rec = Recommendation()
-        rec.pid = PID_1
-        rec.recommended_pid = PID_2
+        rec = make_recommendation(PID_1, PID_2)
         rec.create()
 
         # Read it back
@@ -104,15 +107,56 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_rec.pid, rec.pid)
         self.assertEqual(found_rec.recommended_pid, rec.recommended_pid)
 
-        rec2 = Recommendation()
-        rec2.pid = PID_1
-        rec2.recommended_pid = PID_3
+        rec2 = make_recommendation(PID_1, PID_3)
         rec2.create()
 
-        rec3 = Recommendation()
-        rec3.pid = PID_3
-        rec3.recommended_pid = PID_2
+        rec3 = make_recommendation(PID_3, PID_2)
         rec3.create()
 
+        # rec1 should has only 2 recommended products
         found_rec = Recommendation.find_by_pid(PID_1).all()
         self.assertEqual(len(found_rec), 2)
+
+    def test_update_recommendation(self):
+        """It should Update a recommendation"""
+        PID_1 = 100
+        PID_2 = 200
+        PID_3 = 300
+
+        rec = make_recommendation(PID_1, PID_2)
+        rec.create()
+
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(rec.id)
+        self.assertEqual(rec.recommended_pid, PID_2)
+
+        # Fetch it back
+        found_rec = Recommendation.find(rec.id)
+        found_rec.recommended_pid = PID_3
+        found_rec.update()
+
+        # Fetch it back again
+        found_rec_2 = Recommendation.find(rec.id)
+        self.assertEqual(found_rec_2.recommended_pid, PID_3)
+    
+    def test_delete_a_recommendation(self):
+        """It should Delete a recommendation from the database"""
+        PID_1 = 100
+        PID_2 = 200
+
+        all_rec = Recommendation.all()
+        self.assertEqual(all_rec, [])
+
+        rec = make_recommendation(PID_1, PID_2)
+        rec.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(rec.id)
+
+        all_rec = Recommendation.all()
+        self.assertEqual(len(all_rec), 1)
+
+        # Delete the only one record, and fetching again should return empty
+        rec = all_rec[0]
+        rec.delete()
+        all_rec = Recommendation.all()
+        self.assertEqual(len(all_rec), 0)
