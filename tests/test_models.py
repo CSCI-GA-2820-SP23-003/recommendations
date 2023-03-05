@@ -92,8 +92,8 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_rec.pid, rec.pid)
         self.assertEqual(found_rec.recommended_pid, rec.recommended_pid)
 
-    def test_filter_recommendation(self):
-        """It should Read a filtered list of recommendation"""
+    def test_read_recommendation_by_pid(self):
+        """It should Read a filtered list of recommendation by pid"""
         PID_1 = 100
         PID_2 = 200
         PID_3 = 300
@@ -114,8 +114,27 @@ class TestRecommendation(unittest.TestCase):
         rec3.create()
 
         # rec1 should has only 2 recommended products
+        # find recommendation by pid (PID_1)
         found_rec = Recommendation.find_by_pid(PID_1).all()
         self.assertEqual(len(found_rec), 2)
+
+    def test_list_all_recommendations(self):
+        """It should List all/filtered Recommendations in the database"""
+        all_rec = Recommendation.all()
+        self.assertEqual(all_rec, [])
+
+        for i in range(5):
+            for j in range(3):
+                make_recommendation(i, j).create()
+
+        # Assert that there are 5*3=15 recommendations in the database
+        all_rec = Recommendation.all()
+        self.assertEqual(len(all_rec), 15)
+
+        # each pid has 3 recommended pids
+        for i in range(5):
+            found_rec = Recommendation.find_by_pid(i).all()
+            self.assertEqual(len(found_rec), 3)
 
     def test_update_recommendation(self):
         """It should Update a recommendation"""
