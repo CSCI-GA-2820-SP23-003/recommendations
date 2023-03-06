@@ -174,3 +174,37 @@ class TestRecommendation(unittest.TestCase):
         rec.delete()
         all_rec = Recommendation.all()
         self.assertEqual(len(all_rec), 0)
+
+    def test_serialize_a_recommendation(self):
+        """It should Serialize a Recommendation"""
+        PID_1 = 100
+        PID_2 = 200
+        rec = make_recommendation(PID_1, PID_2)
+        serial_rec = rec.serialize()
+        self.assertEqual(serial_rec["id"], rec.id)
+        self.assertEqual(serial_rec["pid"], rec.pid)
+        self.assertEqual(serial_rec["recommended_pid"], rec.recommended_pid)
+        self.assertEqual(serial_rec["type"], rec.type)
+
+    def test_deserialize_a_recommendation(self):
+        """It should Deserialize a recommendation"""
+        PID_1 = 100
+        PID_2 = 200
+        rec = make_recommendation(PID_1, PID_2)
+        rec.create()
+        serial_rec = rec.serialize()
+        new_rec = Recommendation()
+        new_rec.deserialize(serial_rec)
+        self.assertEqual(new_rec.pid, rec.pid)
+        self.assertEqual(new_rec.recommended_pid, rec.recommended_pid)
+        self.assertEqual(new_rec.type, rec.type)
+
+    def test_deserialize_with_key_error(self):
+        """It should not Deserialize a recommendation with a KeyError"""
+        rec = Recommendation()
+        self.assertRaises(DataValidationError, rec.deserialize, {})
+
+    def test_deserialize_with_type_error(self):
+        """It should not Deserialize a recommendation with a TypeError"""
+        rec = Recommendation()
+        self.assertRaises(DataValidationError, rec.deserialize, [])
