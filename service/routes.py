@@ -75,6 +75,24 @@ def create():
 
 
 ######################################################################
+# DELETE A RECOMMENDATION
+######################################################################
+@app.route("/recommendation/<int:recommendation_id>", methods=["DELETE"])
+def delelte(recommendation_id):
+    """ Create a new recommendation """
+
+    app.logger.info("Request to delete a Recommendation")
+    check_content_type("application/json")
+
+    # Delete the recommendation
+    rec = Recommendation.find(recommendation_id)
+    if rec:
+        rec.deserialize(request.get_json())
+        rec.delete()
+    
+    return make_response( "", status.HTTP_204_NO_CONTENT)
+
+######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
 
