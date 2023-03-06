@@ -21,6 +21,7 @@ DATABASE_URI = os.getenv(
 
 BASE_URL = "/recommendation"
 
+
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
@@ -85,3 +86,26 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(new_rec["pid"], rec.pid, "pid does not match")
         self.assertEqual(new_rec["recommended_pid"], rec.recommended_pid, "recommended_pid does not match")
         self.assertEqual(new_rec["type"], rec.type, "type does not match")
+
+    def test_get(self):
+        """It should Get a Recommendation that is found"""
+        # Create a test case Recommendation
+        rec = make_recommendation(100, 200)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+
+        # Check GET status is 200_OK
+        location = resp.headers.get("Location", None)
+        resp = self.client.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Check GET data is correct
+        data = resp.get_json()
+        self.assertEqual(data["pid"], rec.pid)
+
+    def test_get_not_found(self):
+        """It should not Read a Recommendation that is not found"""
+        # Get a Recommendation that does not exist
+        resp = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
