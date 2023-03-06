@@ -7,20 +7,12 @@ import logging
 import unittest
 from service import app
 from service.models import Recommendation, DataValidationError, db
+from .utils import make_recommendation
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
-################################
-# Util functions for testing
-################################
-def make_recommendation(pid, recommendated_pid, rec_type=0):
-    rec = Recommendation()
-    rec.pid = pid
-    rec.recommended_pid = recommendated_pid
-    rec.type = rec_type
-    return rec
 
 ######################################################################
 #  Recommendation   M O D E L   T E S T   C A S E S

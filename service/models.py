@@ -66,6 +66,7 @@ class Recommendation(db.Model):
             "id": self.id,
             "pid": self.pid,
             "recommended_pid": self.recommended_pid,
+            "type": self.type,
         }
 
     def deserialize(self, data):
@@ -78,6 +79,7 @@ class Recommendation(db.Model):
         try:
             self.pid = data["pid"]
             self.recommended_pid = data["recommended_pid"]
+            self.type = data["type"]
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Recommendation: missing " + error.args[0]
