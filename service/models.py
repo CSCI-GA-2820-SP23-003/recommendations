@@ -33,7 +33,7 @@ class Recommendation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pid = db.Column(db.Integer)
     recommended_pid = db.Column(db.Integer)
-    type = db.Column(db.Integer)
+    type = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return f"<Recommendation id=[{self.id}] ({self.pid} - {self.recommended_pid})>"

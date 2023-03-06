@@ -40,6 +40,7 @@ class TestRecommendation(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ This runs once after the entire test suite """
+        db.session.query(Recommendation).delete()
 
     def setUp(self):
         """ This runs before each test """
@@ -140,7 +141,7 @@ class TestRecommendation(unittest.TestCase):
         """It should Update a recommendation"""
         PID_1 = 100
         PID_2 = 200
-        PID_3 = 300
+        PID_3 = 350
 
         rec = make_recommendation(PID_1, PID_2)
         rec.create()
@@ -157,6 +158,8 @@ class TestRecommendation(unittest.TestCase):
         # Fetch it back again
         found_rec_2 = Recommendation.find(rec.id)
         self.assertEqual(found_rec_2.recommended_pid, PID_3)
+
+        found_rec_2.delete()
     
     def test_delete_a_recommendation(self):
         """It should Delete a recommendation from the database"""
