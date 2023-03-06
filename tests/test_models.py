@@ -7,20 +7,12 @@ import logging
 import unittest
 from service import app
 from service.models import Recommendation, DataValidationError, db
+from .utils import make_recommendation
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
-################################
-# Util functions for testing
-################################
-def make_recommendation(pid, recommendated_pid, rec_type=0):
-    rec = Recommendation()
-    rec.pid = pid
-    rec.recommended_pid = recommendated_pid
-    rec.type = rec_type
-    return rec
 
 ######################################################################
 #  Recommendation   M O D E L   T E S T   C A S E S
@@ -40,6 +32,7 @@ class TestRecommendation(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ This runs once after the entire test suite """
+        db.session.query(Recommendation).delete()
 
     def setUp(self):
         """ This runs before each test """
@@ -140,7 +133,7 @@ class TestRecommendation(unittest.TestCase):
         """It should Update a recommendation"""
         PID_1 = 100
         PID_2 = 200
-        PID_3 = 300
+        PID_3 = 350
 
         rec = make_recommendation(PID_1, PID_2)
         rec.create()
@@ -157,6 +150,8 @@ class TestRecommendation(unittest.TestCase):
         # Fetch it back again
         found_rec_2 = Recommendation.find(rec.id)
         self.assertEqual(found_rec_2.recommended_pid, PID_3)
+
+        found_rec_2.delete()
     
     def test_delete_a_recommendation(self):
         """It should Delete a recommendation from the database"""
