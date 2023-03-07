@@ -85,3 +85,25 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(new_rec["pid"], rec.pid, "pid does not match")
         self.assertEqual(new_rec["recommended_pid"], rec.recommended_pid, "recommended_pid does not match")
         self.assertEqual(new_rec["type"], rec.type, "type does not match")
+
+    def test_delete(self):
+        """It should Delete a Recommendation if exists"""
+        # Create a new Recommendation
+        rec = make_recommendation(100, 200)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = resp.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check that the location header was correct by deleting it
+        resp = self.client.delete(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Check GET status is 404_NOT_FOUND
+        resp = self.client.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        
