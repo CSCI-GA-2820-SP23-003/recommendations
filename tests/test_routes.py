@@ -220,7 +220,7 @@ class TestYourResourceServer(TestCase):
 
     def test_unsupported_media_type(self):
         """It should not Create when sending wrong media type"""
-        rec = make_recommendation(1, 2)
+        rec = make_recommendation(100, 200)
         resp = self.client.post(
             BASE_URL, json=rec.serialize(), content_type="test/html"
         )
