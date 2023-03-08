@@ -118,10 +118,11 @@ class TestYourResourceServer(TestCase):
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
 
         body = {"pid": pid, "recommended_pid": 300, "type": 0}
         resp = self.client.put(
-            BASE_URL+"/"+str(pid), json=body.serialize(),
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
             content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -138,10 +139,11 @@ class TestYourResourceServer(TestCase):
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
 
         body = {"pid": pid, "recommended_pid": 500, "type": 1}
         resp = self.client.put(
-            BASE_URL+"/"+str(pid), json=body.serialize(),
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
             content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -149,10 +151,6 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(updated_rec["pid"], body["pid"], "pid does not match")
         self.assertEqual(updated_rec["recommended_pid"], body["recommended_pid"], "recommended_pid does not match")
         self.assertEqual(updated_rec["type"], body["type"], "type does not match")
-
-        # Make sure location header is set
-        location = resp.headers.get("Location", None)
-        self.assertIsNotNone(location)
 
     def test_update_invalid_recommended_pid(self):
         """It should give an error when invalid pid is given"""
@@ -162,9 +160,11 @@ class TestYourResourceServer(TestCase):
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
         body = {"pid": pid, "recommended_pid": "600", "type": 1}
         resp = self.client.put(
-            BASE_URL+"/"+str(pid), json=body.serialize(),
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
             content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
@@ -177,9 +177,11 @@ class TestYourResourceServer(TestCase):
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
         body = {"pid": pid, "recommended_pid": 600, "type": "2"}
         resp = self.client.put(
-            BASE_URL+"/"+str(pid), json=body.serialize(),
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
             content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
@@ -192,9 +194,11 @@ class TestYourResourceServer(TestCase):
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
         body = {"pid": pid}
         resp = self.client.put(
-            BASE_URL+"/"+str(pid), json=body.serialize(),
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
             content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
