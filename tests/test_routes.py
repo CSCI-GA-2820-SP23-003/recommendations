@@ -111,18 +111,22 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete(self):
-        """It should Delete a Recommendation if exists or not"""
+        """It should Delete a Recommendation if exists"""
         # Create a new Recommendation
         rec = make_recommendation(100, 200)
         resp = self.client.post(
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-        # Check GET status is 200_OK
+        # Make sure location header is set
         location = resp.headers.get("Location", None)
-        resp = self.client.get(location, content_type="application/json")
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(location)
 
-        # Check GET data is correct
-        data = resp.get_json()
-        self.assertEqual(data["pid"], rec.pid)
+        # Check that the location header was correct by deleting it
+        resp = self.client.delete(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Check GET status is 404_NOT_FOUND
+        resp = self.client.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
