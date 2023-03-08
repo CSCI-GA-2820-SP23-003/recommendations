@@ -19,7 +19,7 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
-BASE_URL = "/recommendation"
+BASE_URL = "/recommendations"
 
 
 ######################################################################
@@ -86,6 +86,16 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(new_rec["pid"], rec.pid, "pid does not match")
         self.assertEqual(new_rec["recommended_pid"], rec.recommended_pid, "recommended_pid does not match")
         self.assertEqual(new_rec["type"], rec.type, "type does not match")
+
+    def test_create_invalid(self):
+        """It should be failed to Create a Recommendation"""
+        rec = make_recommendation(100, 200)
+        request_body = rec.serialize()
+        del request_body["recommended_pid"]
+        resp = self.client.post(
+            BASE_URL, json=request_body, content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get(self):
         """It should Get a Recommendation that is found"""
