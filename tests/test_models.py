@@ -61,6 +61,7 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(rec.recommended_pid, 200)
 
     def test_stringify_a_recommendation(self):
+        "Test stringify a Recommendation"
         rec = make_recommendation(10, 20)
         self.assertEqual(str(rec), "<Recommendation id=[None] (10 - 20)>")
 
@@ -77,10 +78,10 @@ class TestRecommendation(unittest.TestCase):
 
     def test_read_recommendation(self):
         """It should Read a recommendation"""
-        PID_1 = 100
-        PID_2 = 200
+        fake_pid_1 = 100
+        fake_pid_2 = 200
 
-        rec = make_recommendation(PID_1, PID_2)
+        rec = make_recommendation(fake_pid_1, fake_pid_2)
         rec.create()
 
         # Read it back
@@ -91,11 +92,11 @@ class TestRecommendation(unittest.TestCase):
 
     def test_read_recommendation_by_pid(self):
         """It should Read a filtered list of recommendation by pid"""
-        PID_1 = 100
-        PID_2 = 200
-        PID_3 = 300
+        fake_pid_1 = 100
+        fake_pid_2 = 200
+        fake_pid_3 = 300
 
-        rec = make_recommendation(PID_1, PID_2)
+        rec = make_recommendation(fake_pid_1, fake_pid_2)
         rec.create()
 
         # Read it back
@@ -104,15 +105,15 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_rec.pid, rec.pid)
         self.assertEqual(found_rec.recommended_pid, rec.recommended_pid)
 
-        rec2 = make_recommendation(PID_1, PID_3)
+        rec2 = make_recommendation(fake_pid_1, fake_pid_3)
         rec2.create()
 
-        rec3 = make_recommendation(PID_3, PID_2)
+        rec3 = make_recommendation(fake_pid_3, fake_pid_2)
         rec3.create()
 
         # rec1 should has only 2 recommended products
-        # find recommendation by pid (PID_1)
-        found_rec = Recommendation.find_by_pid(PID_1).all()
+        # find recommendation by pid (fake_pid_1)
+        found_rec = Recommendation.find_by_pid(fake_pid_1).all()
         self.assertEqual(len(found_rec), 2)
 
     def test_list_all_recommendations(self):
@@ -135,36 +136,36 @@ class TestRecommendation(unittest.TestCase):
 
     def test_update_recommendation(self):
         """It should Update a recommendation"""
-        PID_1 = 100
-        PID_2 = 200
-        PID_3 = 350
-        rec = make_recommendation(PID_1, PID_2)
+        fake_pid_1 = 100
+        fake_pid_2 = 200
+        fake_pid_3 = 350
+        rec = make_recommendation(fake_pid_1, fake_pid_2)
         rec.create()
 
         # Assert that it was assigned an id and shows up in the database
         self.assertIsNotNone(rec.id)
-        self.assertEqual(rec.recommended_pid, PID_2)
+        self.assertEqual(rec.recommended_pid, fake_pid_2)
 
         # Fetch it back
         found_rec = Recommendation.find(rec.id)
-        found_rec.recommended_pid = PID_3
+        found_rec.recommended_pid = fake_pid_3
         found_rec.update()
 
         # Fetch it back again
         found_rec_2 = Recommendation.find(rec.id)
-        self.assertEqual(found_rec_2.recommended_pid, PID_3)
+        self.assertEqual(found_rec_2.recommended_pid, fake_pid_3)
 
         found_rec_2.delete()
 
     def test_delete_a_recommendation(self):
         """It should Delete a recommendation from the database"""
-        PID_1 = 100
-        PID_2 = 200
+        fake_pid_1 = 100
+        fake_pid_2 = 200
 
         all_rec = Recommendation.all()
         self.assertEqual(all_rec, [])
 
-        rec = make_recommendation(PID_1, PID_2)
+        rec = make_recommendation(fake_pid_1, fake_pid_2)
         rec.create()
         # Assert that it was assigned an id and shows up in the database
         self.assertIsNotNone(rec.id)
@@ -180,9 +181,9 @@ class TestRecommendation(unittest.TestCase):
 
     def test_serialize_a_recommendation(self):
         """It should Serialize a Recommendation"""
-        PID_1 = 100
-        PID_2 = 200
-        rec = make_recommendation(PID_1, PID_2)
+        fake_pid_1 = 100
+        fake_pid_2 = 200
+        rec = make_recommendation(fake_pid_1, fake_pid_2)
         serial_rec = rec.serialize()
         self.assertEqual(serial_rec["id"], rec.id)
         self.assertEqual(serial_rec["pid"], rec.pid)
@@ -191,9 +192,9 @@ class TestRecommendation(unittest.TestCase):
 
     def test_deserialize_a_recommendation(self):
         """It should Deserialize a recommendation"""
-        PID_1 = 100
-        PID_2 = 200
-        rec = make_recommendation(PID_1, PID_2)
+        fake_pid_1 = 100
+        fake_pid_2 = 200
+        rec = make_recommendation(fake_pid_1, fake_pid_2)
         rec.create()
         serial_rec = rec.serialize()
         new_rec = Recommendation()

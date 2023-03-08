@@ -4,7 +4,7 @@ My Service
 Describe what your service does here
 """
 
-from flask import Flask, jsonify, request, url_for, make_response, abort
+from flask import jsonify, request, url_for, make_response, abort
 from service.common import error_handlers, status  # HTTP Status Codes
 from service.models import DataValidationError, Recommendation
 
@@ -40,7 +40,7 @@ def list_recommendations():
 
     # Return as an array of dictionaries
     results = [recommendation.serialize() for recommendation in recommendations]
-    
+
     return make_response(jsonify(results), status.HTTP_200_OK)
 
 
