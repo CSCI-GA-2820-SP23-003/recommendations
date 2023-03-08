@@ -31,7 +31,7 @@ def index():
 ######################################################################
 # RETRIEVE A RECOMMENDATION
 ######################################################################
-@app.route("/recommendation/<int:recommendation_id>", methods=["GET"])
+@app.route("/recommendations/<int:recommendation_id>", methods=["GET"])
 def get_recommendation(recommendation_id):
     """
     Retrieve a single Recommendation
@@ -53,7 +53,7 @@ def get_recommendation(recommendation_id):
 ######################################################################
 # CREATE A NEW RECOMMENDATION
 ######################################################################
-@app.route("/recommendation", methods=["POST"])
+@app.route("/recommendations", methods=["POST"])
 def create():
     """ Create a new recommendation """
 
