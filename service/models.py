@@ -47,11 +47,13 @@ class Recommendation(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def update(self):
+    def update(self,data):
         """
         Updates a Recommendation to the database
         """
-        logger.info("Saving recommendation %s (%s - %s)", self.id, self.pid, self.recommended_pid)
+        logger.info("Updating recommendation %s (%s - %s)", self.id, self.pid, data['recommended_pid'])
+        self.recommended_pid = data['recommended_pid']
+        self.type = data['type']
         db.session.commit()
 
     def delete(self):

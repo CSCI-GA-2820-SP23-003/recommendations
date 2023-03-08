@@ -134,7 +134,6 @@ class TestRecommendation(unittest.TestCase):
         PID_1 = 100
         PID_2 = 200
         PID_3 = 350
-
         rec = make_recommendation(PID_1, PID_2)
         rec.create()
 
@@ -145,7 +144,7 @@ class TestRecommendation(unittest.TestCase):
         # Fetch it back
         found_rec = Recommendation.find(rec.id)
         found_rec.recommended_pid = PID_3
-        found_rec.update()
+        found_rec.update(found_rec)
 
         # Fetch it back again
         found_rec_2 = Recommendation.find(rec.id)

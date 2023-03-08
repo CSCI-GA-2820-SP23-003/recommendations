@@ -109,3 +109,89 @@ class TestYourResourceServer(TestCase):
         # Get a Recommendation that does not exist
         resp = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        
+    def test_update(self):
+        """It should update the given recommendation"""
+        pid = 100
+        rec = make_recommendation(pid,200,0)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        body = {"pid":pid ,"recommended_pid":300, "type": 0}
+        resp = self.client.put(
+            BASE_URL+"/"+str(pid), json=body.serialize(),
+             content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_rec = resp.get_json()
+        self.assertEqual(updated_rec["pid"], body["pid"], "pid does not match")
+        self.assertEqual(updated_rec["recommended_pid"], body["recommended_pid"], 
+        "recommended_pid does not match")
+        self.assertEqual(updated_rec["type"], body["type"], "type does not match")
+
+        # """It should update the given recommendation: Update type"""
+        pid = 400
+        rec = make_recommendation(pid,200,0)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        body = {"pid":pid ,"recommended_pid":500, "type": 1}
+        resp = self.client.put(
+            BASE_URL+"/"+str(pid), json=body.serialize(),
+             content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_rec = resp.get_json()
+        self.assertEqual(updated_rec["pid"], body["pid"], "pid does not match")
+        self.assertEqual(updated_rec["recommended_pid"], body["recommended_pid"], "recommended_pid does not match")
+        self.assertEqual(updated_rec["type"], body["type"], "type does not match")
+
+        # Make sure location header is set
+        location = resp.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Test invalid recommended_pid
+        pid = 500
+        rec = make_recommendation(pid,200,0)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        body = {"pid":pid ,"recommended_pid":"600", "type": 1}
+        resp = self.client.put(
+            BASE_URL+"/"+str(pid), json=body.serialize(),
+             content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Test invalid type
+        pid = 500
+        rec = make_recommendation(pid,300,1)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        body = {"pid":pid ,"recommended_pid":600, "type": "2"}
+        resp = self.client.put(
+            BASE_URL+"/"+str(pid), json=body.serialize(),
+             content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Test no input
+        pid = 500
+        rec = make_recommendation(pid,300,1)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        body = {"pid":pid}
+        resp = self.client.put(
+            BASE_URL+"/"+str(pid), json=body.serialize(),
+             content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)

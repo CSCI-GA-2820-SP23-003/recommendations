@@ -73,6 +73,50 @@ def create():
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
 
+######################################################################
+# UPDATE A RECOMMENDATION
+######################################################################
+@app.route("/recommendation/<int:recommendation_id>", methods=["PUT"])
+def update(recommendation_id):
+    """ Update a recommendation """
+    app.logger.info("Request to update a Recommendation")
+    check_content_type("application/json")
+
+    rec = Recommendation.find(recommendation_id)
+    if not rec:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Recommendation with id '{recommendation_id}' could not be found.",
+        )
+
+    request_body = request.json
+    if 're' not in request_body and 'type' not in request_body:
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            "Request Body invalid",
+        )
+
+    if not isinstance(request_body['recommended_pid'], int):
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            "Recommended PID Invalid",
+        )
+
+    if not isinstance(request_body['type'], int):
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            "Type Invalid",
+        )
+
+    rec.update(request_body)
+    # Create a message to return
+    message = rec.serialize()
+    location_url = url_for("update", recommendation_id=recommendation_id, _external=True)
+
+    return make_response(
+        jsonify(message), status.HTTP_200_OK, {"Location": location_url}
+    )
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
