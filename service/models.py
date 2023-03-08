@@ -51,7 +51,7 @@ class Recommendation(db.Model):
         """
         Updates a Recommendation to the database
         """
-        logger.info("Saving recommendation %s (%s - %s)", self.id, self.pid, self.recommended_pid)
+        logger.info("Updating recommendation %s (%s - %s)", self.id, self.pid, self.recommended_pid)
         db.session.commit()
 
     def delete(self):
