@@ -6,7 +6,7 @@ import os
 import logging
 import unittest
 from service import app
-from service.models import Recommendation, db
+from service.models import DataValidationError, Recommendation, db
 from .utils import make_recommendation
 
 DATABASE_URI = os.getenv(

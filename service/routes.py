@@ -5,8 +5,8 @@ Describe what your service does here
 """
 
 from flask import Flask, jsonify, request, url_for, make_response, abort
-from service.common import status  # HTTP Status Codes
-from service.models import Recommendation
+from service.common import error_handlers, status  # HTTP Status Codes
+from service.models import DataValidationError, Recommendation
 
 # Import Flask application
 from . import app
@@ -62,7 +62,10 @@ def create():
 
     # Create the account
     rec = Recommendation()
-    rec.deserialize(request.get_json())
+    try:
+        rec.deserialize(request.get_json())
+    except DataValidationError as err:
+        return error_handlers.request_validation_error(err)
     rec.create()
 
     # Create a message to return
@@ -77,7 +80,7 @@ def create():
 ######################################################################
 # UPDATE A RECOMMENDATION
 ######################################################################
-@app.route("/recommendation/<int:recommendation_id>", methods=["PUT"])
+@app.route("/recommendations/<int:recommendation_id>", methods=["PUT"])
 def update(recommendation_id):
     """ Update a recommendation """
     app.logger.info("Request to update a Recommendation")
