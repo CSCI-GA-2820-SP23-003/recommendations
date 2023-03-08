@@ -31,7 +31,7 @@ def index():
 ######################################################################
 # LIST ALL RECOMMENDATIONS
 ######################################################################
-@app.route("/recommendation", methods=["GET"])
+@app.route("/recommendations", methods=["GET"])
 def list_recommendations():
     """Returns all of the Recommendations"""
     app.logger.info("Request for Recommendations list")
