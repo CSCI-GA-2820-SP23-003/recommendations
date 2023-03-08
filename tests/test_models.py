@@ -6,7 +6,7 @@ import os
 import logging
 import unittest
 from service import app
-from service.models import Recommendation, DataValidationError, db
+from service.models import DataValidationError, Recommendation, db
 from .utils import make_recommendation
 
 DATABASE_URI = os.getenv(
@@ -59,6 +59,10 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(rec.id, None)
         self.assertEqual(rec.pid, 100)
         self.assertEqual(rec.recommended_pid, 200)
+
+    def test_stringify_a_recommendation(self):
+        rec = make_recommendation(10, 20)
+        self.assertEqual(str(rec), "<Recommendation id=[None] (10 - 20)>")
 
     def test_add_a_recommendation(self):
         """It should Create a Recommendation and add it to the database"""
@@ -134,7 +138,6 @@ class TestRecommendation(unittest.TestCase):
         PID_1 = 100
         PID_2 = 200
         PID_3 = 350
-
         rec = make_recommendation(PID_1, PID_2)
         rec.create()
 
@@ -152,7 +155,7 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_rec_2.recommended_pid, PID_3)
 
         found_rec_2.delete()
-    
+
     def test_delete_a_recommendation(self):
         """It should Delete a recommendation from the database"""
         PID_1 = 100
@@ -174,3 +177,37 @@ class TestRecommendation(unittest.TestCase):
         rec.delete()
         all_rec = Recommendation.all()
         self.assertEqual(len(all_rec), 0)
+
+    def test_serialize_a_recommendation(self):
+        """It should Serialize a Recommendation"""
+        PID_1 = 100
+        PID_2 = 200
+        rec = make_recommendation(PID_1, PID_2)
+        serial_rec = rec.serialize()
+        self.assertEqual(serial_rec["id"], rec.id)
+        self.assertEqual(serial_rec["pid"], rec.pid)
+        self.assertEqual(serial_rec["recommended_pid"], rec.recommended_pid)
+        self.assertEqual(serial_rec["type"], rec.type)
+
+    def test_deserialize_a_recommendation(self):
+        """It should Deserialize a recommendation"""
+        PID_1 = 100
+        PID_2 = 200
+        rec = make_recommendation(PID_1, PID_2)
+        rec.create()
+        serial_rec = rec.serialize()
+        new_rec = Recommendation()
+        new_rec.deserialize(serial_rec)
+        self.assertEqual(new_rec.pid, rec.pid)
+        self.assertEqual(new_rec.recommended_pid, rec.recommended_pid)
+        self.assertEqual(new_rec.type, rec.type)
+
+    def test_deserialize_with_key_error(self):
+        """It should not Deserialize a recommendation with a KeyError"""
+        rec = Recommendation()
+        self.assertRaises(DataValidationError, rec.deserialize, {})
+
+    def test_deserialize_with_type_error(self):
+        """It should not Deserialize a recommendation with a TypeError"""
+        rec = Recommendation()
+        self.assertRaises(DataValidationError, rec.deserialize, [])

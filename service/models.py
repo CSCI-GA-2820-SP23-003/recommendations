@@ -51,7 +51,7 @@ class Recommendation(db.Model):
         """
         Updates a Recommendation to the database
         """
-        logger.info("Saving recommendation %s (%s - %s)", self.id, self.pid, self.recommended_pid)
+        logger.info("Updating recommendation %s (%s - %s)", self.id, self.pid, self.recommended_pid)
         db.session.commit()
 
     def delete(self):
@@ -87,7 +87,7 @@ class Recommendation(db.Model):
         except TypeError as error:
             raise DataValidationError(
                 "Invalid Recommendation: body of request contained bad or no data - "
-                "Error message: " + error
+                "Error message: " + str(error)
             ) from error
         return self
 

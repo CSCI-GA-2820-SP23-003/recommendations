@@ -5,8 +5,8 @@ Describe what your service does here
 """
 
 from flask import Flask, jsonify, request, url_for, make_response, abort
-from service.common import status  # HTTP Status Codes
-from service.models import Recommendation
+from service.common import error_handlers, status  # HTTP Status Codes
+from service.models import DataValidationError, Recommendation
 
 # Import Flask application
 from . import app
@@ -31,7 +31,7 @@ def index():
 ######################################################################
 # RETRIEVE A RECOMMENDATION
 ######################################################################
-@app.route("/recommendation/<int:recommendation_id>", methods=["GET"])
+@app.route("/recommendations/<int:recommendation_id>", methods=["GET"])
 def get_recommendation(recommendation_id):
     """
     Retrieve a single Recommendation
@@ -53,7 +53,7 @@ def get_recommendation(recommendation_id):
 ######################################################################
 # CREATE A NEW RECOMMENDATION
 ######################################################################
-@app.route("/recommendation", methods=["POST"])
+@app.route("/recommendations", methods=["POST"])
 def create():
     """ Create a new recommendation """
 
@@ -62,13 +62,16 @@ def create():
 
     # Create the account
     rec = Recommendation()
-    rec.deserialize(request.get_json())
+    try:
+        rec.deserialize(request.get_json())
+    except DataValidationError as err:
+        return error_handlers.request_validation_error(err)
     rec.create()
 
     # Create a message to return
     message = rec.serialize()
     location_url = url_for("get_recommendation", recommendation_id=rec.id, _external=True)
-    
+
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
@@ -91,6 +94,54 @@ def delelte(recommendation_id):
         rec.delete()
     
     return make_response("", status.HTTP_204_NO_CONTENT)
+
+# UPDATE A RECOMMENDATION
+######################################################################
+@app.route("/recommendations/<int:recommendation_id>", methods=["PUT"])
+def update(recommendation_id):
+    """ Update a recommendation """
+    app.logger.info("Request to update a Recommendation")
+    check_content_type("application/json")
+
+    rec = Recommendation.find(recommendation_id)
+    if not rec:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Recommendation with id '{recommendation_id}' could not be found.",
+        )
+
+    request_body = request.json
+    if 'recommended_pid' not in request_body and 'type' not in request_body:
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            "Request Body invalid",
+        )
+
+    if not isinstance(request_body['recommended_pid'], int):
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            "Recommended PID Invalid",
+        )
+
+    if not isinstance(request_body['type'], int):
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            "Type Invalid",
+        )
+
+    if 'recommended_pid' in request_body:
+        rec.recommended_pid = request_body['recommended_pid']
+
+    if 'type' in request_body:
+        rec.type = request_body['type']
+
+    rec.update()
+    # Create a message to return
+    message = rec.serialize()
+    return make_response(
+        jsonify(message), status.HTTP_200_OK
+    )
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
