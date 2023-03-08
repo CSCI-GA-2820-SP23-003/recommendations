@@ -29,6 +29,22 @@ def index():
 
 
 ######################################################################
+# LIST ALL RECOMMENDATIONS
+######################################################################
+@app.route("/recommendation", methods=["GET"])
+def list_recommendations():
+    """Returns all of the Recommendations"""
+    app.logger.info("Request for Recommendations list")
+
+    recommendations = Recommendation.all()
+
+    # Return as an array of dictionaries
+    results = [recommendation.serialize() for recommendation in recommendations]
+    
+    return make_response(jsonify(results), status.HTTP_200_OK)
+
+
+######################################################################
 # RETRIEVE A RECOMMENDATION
 ######################################################################
 @app.route("/recommendation/<int:recommendation_id>", methods=["GET"])
