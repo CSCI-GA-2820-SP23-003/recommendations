@@ -8,7 +8,7 @@ Test cases can be run with the following:
 import os
 import logging
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+# from unittest.mock import MagicMock, patch
 from service import app
 from service.models import db, Recommendation, init_db
 from service.common import status  # HTTP Status Codes
@@ -19,7 +19,7 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
-BASE_URL = "/recommendation"
+BASE_URL = "/recommendations"
 
 
 ######################################################################
@@ -87,6 +87,16 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(new_rec["recommended_pid"], rec.recommended_pid, "recommended_pid does not match")
         self.assertEqual(new_rec["type"], rec.type, "type does not match")
 
+    def test_create_invalid(self):
+        """It should be failed to Create a Recommendation"""
+        rec = make_recommendation(100, 200)
+        request_body = rec.serialize()
+        del request_body["recommended_pid"]
+        resp = self.client.post(
+            BASE_URL, json=request_body, content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_get(self):
         """It should Get a Recommendation that is found"""
         # Create a test case Recommendation
@@ -109,6 +119,118 @@ class TestYourResourceServer(TestCase):
         # Get a Recommendation that does not exist
         resp = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_rec_pid(self):
+        """It should update the recommended product"""
+        pid = 100
+        rec = make_recommendation(pid, 200, 0)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        body = {"pid": pid, "recommended_pid": 300, "type": 0}
+        resp = self.client.put(
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_rec = resp.get_json()
+        self.assertEqual(updated_rec["pid"], body["pid"], "pid does not match")
+        self.assertEqual(updated_rec["recommended_pid"], body["recommended_pid"], "recommended_pid does not match")
+        self.assertEqual(updated_rec["type"], body["type"], "type does not match")
+
+    def test_update_type(self):
+        """It should update the given recommendation type"""
+        pid = 400
+        rec = make_recommendation(pid, 200, 0)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        body = {"pid": pid, "recommended_pid": 500, "type": 1}
+        resp = self.client.put(
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_rec = resp.get_json()
+        self.assertEqual(updated_rec["pid"], body["pid"], "pid does not match")
+        self.assertEqual(updated_rec["recommended_pid"], body["recommended_pid"], "recommended_pid does not match")
+        self.assertEqual(updated_rec["type"], body["type"], "type does not match")
+
+    def test_update_invalid_recommended_pid(self):
+        """It should give an error when invalid pid is given"""
+        pid = 500
+        rec = make_recommendation(pid, 200, 0)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        body = {"pid": pid, "recommended_pid": "600", "type": 1}
+        resp = self.client.put(
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_invalid_type(self):
+        """It should give an error when invalid type is given"""
+        pid = 500
+        rec = make_recommendation(pid, 300, 1)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        body = {"pid": pid, "recommended_pid": 600, "type": "2"}
+        resp = self.client.put(
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_no_input(self):
+        """It should give an error when no input is provided"""
+        pid = 500
+        rec = make_recommendation(pid, 300, 1)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        body = {"pid": pid}
+        resp = self.client.put(
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_bad_request(self):
+        """It should not Create when sending the wrong data"""
+        resp = self.client.post(BASE_URL, json={"name": "not enough data"})
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_unsupported_media_type(self):
+        """It should not Create when sending wrong media type"""
+        rec = make_recommendation(100, 200)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="test/html"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_method_not_allowed(self):
+        """It should not allow an illegal method call"""
+        resp = self.client.put(BASE_URL, json={"not": "today"})
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
     def test_delete(self):
         """It should Delete a Recommendation if exists"""
