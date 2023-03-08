@@ -6,7 +6,7 @@ import os
 import logging
 import unittest
 from service import app
-from service.models import Recommendation, DataValidationError, db
+from service.models import Recommendation, db
 from .utils import make_recommendation
 
 DATABASE_URI = os.getenv(
@@ -134,7 +134,6 @@ class TestRecommendation(unittest.TestCase):
         PID_1 = 100
         PID_2 = 200
         PID_3 = 350
-
         rec = make_recommendation(PID_1, PID_2)
         rec.create()
 
@@ -152,7 +151,7 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_rec_2.recommended_pid, PID_3)
 
         found_rec_2.delete()
-    
+
     def test_delete_a_recommendation(self):
         """It should Delete a recommendation from the database"""
         PID_1 = 100
