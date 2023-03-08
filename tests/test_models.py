@@ -60,6 +60,10 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(rec.pid, 100)
         self.assertEqual(rec.recommended_pid, 200)
 
+    def test_stringify_a_recommendation(self):
+        rec = make_recommendation(10, 20)
+        self.assertEqual(str(rec), "<Recommendation id=[None] (10 - 20)>")
+
     def test_add_a_recommendation(self):
         """It should Create a Recommendation and add it to the database"""
         recs = Recommendation.all()
