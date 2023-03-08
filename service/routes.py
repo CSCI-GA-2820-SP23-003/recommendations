@@ -117,10 +117,9 @@ def update(recommendation_id):
     rec.update()
     # Create a message to return
     message = rec.serialize()
-    location_url = url_for("update", recommendation_id=recommendation_id, _external=True)
 
     return make_response(
-        jsonify(message), status.HTTP_200_OK, {"Location": location_url}
+        jsonify(message), status.HTTP_200_OK
     )
 
 
