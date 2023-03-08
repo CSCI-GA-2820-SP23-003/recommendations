@@ -61,6 +61,20 @@ class TestYourResourceServer(TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+    def test_get_recommendation_list(self):
+        """It should get a list of Recommendations"""
+        for i in range(5):
+            for j in range(3):
+                rec = make_recommendation(i, j)
+                resp = self.client.post(
+                    BASE_URL, json=rec.serialize(), content_type="application/json"
+                )
+
+        resp = self.client.get(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 15)
+
     def test_create(self):
         """It should Create a new Recommendation"""
         rec = make_recommendation(100, 200)
