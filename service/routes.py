@@ -68,7 +68,7 @@ def create():
     # Create a message to return
     message = rec.serialize()
     location_url = url_for("get_recommendation", recommendation_id=rec.id, _external=True)
-    
+
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
@@ -90,7 +90,7 @@ def update(recommendation_id):
         )
 
     request_body = request.json
-    if 're' not in request_body and 'type' not in request_body:
+    if 'recommended_pid' not in request_body and 'type' not in request_body:
         abort(
             status.HTTP_400_BAD_REQUEST,
             "Request Body invalid",
@@ -108,7 +108,13 @@ def update(recommendation_id):
             "Type Invalid",
         )
 
-    rec.update(request_body)
+    if 'recommended_pid' in request_body:
+        rec.recommended_pid = request_body['recommended_pid']
+
+    if 'type' in request_body:
+        rec.type = request_body['type']
+
+    rec.update()
     # Create a message to return
     message = rec.serialize()
     location_url = url_for("update", recommendation_id=recommendation_id, _external=True)
