@@ -124,9 +124,9 @@ class TestYourResourceServer(TestCase):
         self.assertIsNotNone(location)
 
         # Check that the location header was correct by deleting it
-        resp = self.client.delete("/recommendations/200", content_type="application/json")
+        resp = self.client.delete(f"{BASE_URL}/200", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
         # Check GET status is 404_NOT_FOUND
-        resp = self.client.get("/recommendations/200", content_type="application/json")
+        resp = self.client.get(f"{BASE_URL}/200", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
