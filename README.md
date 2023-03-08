@@ -13,6 +13,43 @@ This project template contains starter code for your class project. The `/servic
 
 The best way to use this repo is to start your own repo using it as a git template. To do this just press the green **Use this template** button in GitHub and this will become the source for your repository.
 
+## APIs
+```
+== Get the list of all recommendations
+GET /recommendations
+	-> 200 + [Recommendation{}, ...]
+    
+== Get a recommendation
+GET /recommendations/<pid>
+    <- Path arg:
+            pid : int ; product ID
+	-> 200 + Recommendation{}
+    
+== Create a Recommendation
+POST /recommendations
+    <- Req JSON:
+            pid : int ; product ID
+            recommended_pid : int: the recommended product ID
+            type : int ; recommendation type
+	-> 201 + Recommendation{}
+    
+== Update a recommendation
+PUT /recommendations/<pid>
+    <- Path arg:
+            pid : int ; product ID
+    <- Req JSON:
+            pid : int ; product ID
+            recommended_pid : int: the recommended product ID
+            type : int ; recommendation type
+	-> 200 + Recommendation{}
+    
+== Delete a recommendation
+DELETE /recommendations/<pid>
+    <- Path arg:
+            pid : int ; product ID
+	-> 204 + EMPTY
+```
+
 ## Manual Setup
 
 You can also clone this repository and then copy and paste the starter code into your project repo folder on your local computer. Be careful not to copy over your own `README.md` file so be selective in what you copy.
