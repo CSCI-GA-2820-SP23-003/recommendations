@@ -244,3 +244,25 @@ class TestYourResourceServer(TestCase):
         """It should not allow an illegal method call"""
         resp = self.client.put(BASE_URL, json={"not": "today"})
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+    def test_delete(self):
+        """It should Delete a Recommendation if exists"""
+        # Create a new Recommendation
+        rec = make_recommendation(100, 200)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = resp.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check that the location header was correct by deleting it
+        resp = self.client.delete(f"{BASE_URL}/200", content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Check GET status is 404_NOT_FOUND
+        resp = self.client.get(f"{BASE_URL}/200", content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
