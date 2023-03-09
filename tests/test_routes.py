@@ -245,7 +245,6 @@ class TestYourResourceServer(TestCase):
         resp = self.client.put(BASE_URL, json={"not": "today"})
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
     def test_delete(self):
         """It should Delete a Recommendation if exists"""
         # Create a new Recommendation

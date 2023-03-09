@@ -108,8 +108,9 @@ def delelte(recommendation_id):
     if rec:
         # rec.deserialize(request.get_json())
         rec.delete()
-    
+
     return make_response("", status.HTTP_204_NO_CONTENT)
+
 
 # UPDATE A RECOMMENDATION
 ######################################################################
