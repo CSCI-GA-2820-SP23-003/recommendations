@@ -101,7 +101,6 @@ def delelte(recommendation_id):
     """ Create a new recommendation """
 
     app.logger.info("Request to delete a Recommendation")
-    check_content_type("application/json")
 
     # Delete the recommendation
     rec = Recommendation.find(recommendation_id)
