@@ -78,10 +78,7 @@ def create():
 
     # Create the account
     rec = Recommendation()
-    try:
-        rec.deserialize(request.get_json())
-    except DataValidationError as err:
-        return error_handlers.request_validation_error(err)
+    rec.deserialize(request.get_json())
     rec.create()
 
     # Create a message to return
