@@ -123,32 +123,10 @@ def update(recommendation_id):
             f"Recommendation with id '{recommendation_id}' could not be found.",
         )
 
-    request_body = request.json
-    if 'recommended_pid' not in request_body and 'type' not in request_body:
-        abort(
-            status.HTTP_400_BAD_REQUEST,
-            "Request Body invalid",
-        )
-
-    if not isinstance(request_body['recommended_pid'], int):
-        abort(
-            status.HTTP_400_BAD_REQUEST,
-            "Recommended PID Invalid",
-        )
-
-    if not isinstance(request_body['type'], int):
-        abort(
-            status.HTTP_400_BAD_REQUEST,
-            "Type Invalid",
-        )
-
-    if 'recommended_pid' in request_body:
-        rec.recommended_pid = request_body['recommended_pid']
-
-    if 'type' in request_body:
-        rec.type = request_body['type']
-
+    rec.deserialize(request.get_json())
+    rec.id = recommendation_id
     rec.update()
+
     # Create a message to return
     message = rec.serialize()
     return make_response(
