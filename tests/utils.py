@@ -2,10 +2,10 @@
 Util functions for test cases
 '''
 
-from service.models import Recommendation
+from service.models import Recommendation, RecommendationType
 
 
-def make_recommendation(pid, recommendated_pid, rec_type=0):
+def make_recommendation(pid, recommendated_pid, rec_type=RecommendationType.DEFAULT):
     "Generate a Recommendation by the given arguments"
     rec = Recommendation()
     rec.pid = pid
