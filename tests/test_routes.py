@@ -10,7 +10,7 @@ import logging
 from unittest import TestCase
 # from unittest.mock import MagicMock, patch
 from service import app
-from service.models import db, Recommendation, init_db
+from service.models import db, Recommendation, RecommendationType, init_db
 from service.common import status  # HTTP Status Codes
 from .utils import make_recommendation
 
@@ -144,7 +144,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         created_rec = resp.get_json()
 
-        body = {"pid": pid, "recommended_pid": 300, "type": 0}
+        body = {"pid": pid, "recommended_pid": 300, "type": RecommendationType.CROSS_SELL}
         resp = self.client.put(
             BASE_URL+"/"+str(created_rec["id"]), json=body,
             content_type="application/json"
@@ -165,7 +165,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         created_rec = resp.get_json()
 
-        body = {"pid": pid, "recommended_pid": 500, "type": 1}
+        body = {"pid": pid, "recommended_pid": 500, "type": RecommendationType.CROSS_SELL}
         resp = self.client.put(
             BASE_URL+"/"+str(created_rec["id"]), json=body,
             content_type="application/json"

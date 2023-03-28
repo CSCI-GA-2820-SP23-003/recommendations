@@ -3,6 +3,8 @@ Models for Recommendation
 
 All of the models are stored in this module
 """
+from enum import Enum
+
 import logging
 from flask_sqlalchemy import SQLAlchemy
 
@@ -22,6 +24,17 @@ class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
 
 
+class RecommendationType(str, Enum):
+    """
+    Enum of different type of recommendation
+    """
+    DEFAULT = 'default'
+    CROSS_SELL = 'cross-sell'
+    UP_SELL = 'up-sell'
+    ACCESSORY = 'accessory'
+    FREQUENTLY_TOGETHER = 'frequently_together'
+
+
 class Recommendation(db.Model):
     """
     Class that represents a Recommendation
@@ -33,7 +46,7 @@ class Recommendation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pid = db.Column(db.Integer)
     recommended_pid = db.Column(db.Integer)
-    type = db.Column(db.Integer, default=0)
+    type = db.Column(db.String(64))
 
     def __repr__(self):
         return f"<Recommendation id=[{self.id}] ({self.pid} - {self.recommended_pid})>"
