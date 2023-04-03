@@ -65,7 +65,7 @@ class TestYourResourceServer(TestCase):
         """It should get a list of Recommendations"""
         for i in range(5):
             for j in range(3):
-                rec = make_recommendation(i, j, RecommendationType.DEFAULT, False)
+                rec = make_recommendation(i, j)
                 resp = self.client.post(
                     BASE_URL, json=rec.serialize(), content_type="application/json"
                 )
