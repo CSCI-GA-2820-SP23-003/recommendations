@@ -7,7 +7,7 @@ import logging
 import unittest
 from service import app
 from service.models import DataValidationError, Recommendation, db
-from .utils import make_recommendation
+from tests.utils import make_recommendation
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
