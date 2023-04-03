@@ -89,7 +89,7 @@ def return_k(recommendation_pid, amount):
             f"Amount '{amount}' is too large",
         )
 
-    #Get top k recommendations (Sort first if adding priority)
+    # Get top k recommendations (Sort first if adding priority)
     result = results[0:amount]
 
     return make_response(jsonify(result), status.HTTP_200_OK)
