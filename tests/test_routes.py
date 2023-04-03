@@ -141,7 +141,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 3)
-    
+
     def test_get_k_recommendation_amount_too_large(self):
         """It should give a warning about amount too large"""
         i = 100
