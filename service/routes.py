@@ -67,6 +67,35 @@ def get_recommendation(recommendation_id):
 
 
 ######################################################################
+# RETURN SPECIFIC AMOUNT OF RECOMMENDATIONS
+######################################################################
+@app.route("/recommendations/<int:recommendation_pid>/get-k/<int:amount>", methods=["GET"])
+def return_k(recommendation_pid, amount):
+    """
+    This will return k recommendations for <rec_pid> where k is a given int
+    """
+    app.logger.info("Request for %s Recommendations", amount)
+
+    results = []
+    recommendations = Recommendation.all()
+    for recommendation in recommendations:
+        if recommendation.pid == recommendation_pid:
+            results.append(recommendation.serialize())
+
+    # amount larger than the records_num
+    if amount > len(results):
+        abort(
+            status.HTTP_400_BAD_REQUEST,
+            f"Amount '{amount}' is too large",
+        )
+
+    #Get top k recommendations (Sort first if adding priority)
+    result = results[0:amount]
+
+    return make_response(jsonify(result), status.HTTP_200_OK)
+
+
+######################################################################
 # CREATE A NEW RECOMMENDATION
 ######################################################################
 @app.route("/recommendations", methods=["POST"])
