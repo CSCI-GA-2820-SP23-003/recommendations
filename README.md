@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/badge/Language-Python-blue.svg)](https://python.org/)
 
 [![Build Status](https://github.com/CSCI-GA-2820-SP23-003/recommendations/actions/workflows/tdd.yml/badge.svg)](https://github.com/CSCI-GA-2820-SP23-003/recommendations/actions)
+[![codecov](https://codecov.io/gh/CSCI-GA-2820-SP23-003/recommendations/branch/master/graph/badge.svg?token=MVEA3AV9VJ)](https://codecov.io/gh/CSCI-GA-2820-SP23-003/recommendations)
 
 This is a skeleton you can use to start your projects
 
