@@ -47,6 +47,7 @@ class Recommendation(db.Model):
     pid = db.Column(db.Integer)
     recommended_pid = db.Column(db.Integer)
     type = db.Column(db.String(64))
+    liked = db.Column(db.Boolean)
 
     def __repr__(self):
         return f"<Recommendation id=[{self.id}] ({self.pid} - {self.recommended_pid})>"
@@ -80,6 +81,7 @@ class Recommendation(db.Model):
             "pid": self.pid,
             "recommended_pid": self.recommended_pid,
             "type": self.type,
+            "liked": self.liked,
         }
 
     def deserialize(self, data):
@@ -93,6 +95,7 @@ class Recommendation(db.Model):
             self.pid = data["pid"]
             self.recommended_pid = data["recommended_pid"]
             self.type = data["type"]
+            self.liked = data.get("liked", False)
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Recommendation: missing " + error.args[0]

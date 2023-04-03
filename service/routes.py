@@ -102,12 +102,12 @@ def delelte(recommendation_id):
     # Delete the recommendation
     rec = Recommendation.find(recommendation_id)
     if rec:
-        # rec.deserialize(request.get_json())
         rec.delete()
 
     return make_response("", status.HTTP_204_NO_CONTENT)
 
 
+######################################################################
 # UPDATE A RECOMMENDATION
 ######################################################################
 @app.route("/recommendations/<int:recommendation_id>", methods=["PUT"])
@@ -133,6 +133,55 @@ def update(recommendation_id):
         jsonify(message), status.HTTP_200_OK
     )
 
+
+######################################################################
+# (ACTION) LIKE A RECOMMENDATION
+######################################################################
+@app.route("/recommendations/<int:recommendation_id>/like", methods=["PUT"])
+def like(recommendation_id):
+    """ Like a recommendation """
+    app.logger.info("Request to like a Recommendation")
+
+    rec = Recommendation.find(recommendation_id)
+    if not rec:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Recommendation with id '{recommendation_id}' could not be found.",
+        )
+
+    rec.liked = True
+    rec.update()
+
+    # Create a message to return
+    message = rec.serialize()
+    return make_response(
+        jsonify(message), status.HTTP_200_OK
+    )
+
+
+######################################################################
+# (ACTION) UNLIKE A RECOMMENDATION
+######################################################################
+@app.route("/recommendations/<int:recommendation_id>/unlike", methods=["PUT"])
+def unlike(recommendation_id):
+    """ Unlike a recommendation """
+    app.logger.info("Request to unlike a Recommendation")
+
+    rec = Recommendation.find(recommendation_id)
+    if not rec:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Recommendation with id '{recommendation_id}' could not be found.",
+        )
+
+    rec.liked = False
+    rec.update()
+
+    # Create a message to return
+    message = rec.serialize()
+    return make_response(
+        jsonify(message), status.HTTP_200_OK
+    )
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

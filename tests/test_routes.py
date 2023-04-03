@@ -12,7 +12,7 @@ from unittest import TestCase
 from service import app
 from service.models import db, Recommendation, RecommendationType, init_db
 from service.common import status  # HTTP Status Codes
-from .utils import make_recommendation
+from tests.utils import make_recommendation
 
 
 DATABASE_URI = os.getenv(
@@ -137,7 +137,7 @@ class TestYourResourceServer(TestCase):
     def test_update_rec_pid(self):
         """It should update the recommended product"""
         pid = 100
-        rec = make_recommendation(pid, 200, 0)
+        rec = make_recommendation(pid, 200)
         resp = self.client.post(
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
@@ -155,10 +155,13 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(updated_rec["recommended_pid"], body["recommended_pid"], "recommended_pid does not match")
         self.assertEqual(updated_rec["type"], body["type"], "type does not match")
 
+        resp = self.client.put(BASE_URL+"/9999", json=body, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_update_type(self):
         """It should update the given recommendation type"""
         pid = 400
-        rec = make_recommendation(pid, 200, 0)
+        rec = make_recommendation(pid, 200)
         resp = self.client.post(
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
@@ -197,20 +200,63 @@ class TestYourResourceServer(TestCase):
     def test_delete(self):
         """It should Delete a Recommendation if exists"""
         # Create a new Recommendation
-        rec = make_recommendation(100, 200)
+        pid = 100
+        rec = make_recommendation(pid, 200, RecommendationType.DEFAULT)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        # Deleting again should have no effect
         resp = self.client.post(
             BASE_URL, json=rec.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-        # Make sure location header is set
-        location = resp.headers.get("Location", None)
-        self.assertIsNotNone(location)
-
         # Check that the location header was correct by deleting it
-        resp = self.client.delete(f"{BASE_URL}/200", content_type="application/json")
+        resp = self.client.delete(f"{BASE_URL}/{created_rec['id']}")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
         # Check GET status is 404_NOT_FOUND
-        resp = self.client.get(f"{BASE_URL}/200", content_type="application/json")
+        resp = self.client.get(f"{BASE_URL}/{created_rec['id']}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_like(self):
+        """It should like the given recommendation"""
+        pid = 100
+        rec = make_recommendation(pid, 200, RecommendationType.DEFAULT)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        resp = self.client.put(BASE_URL+"/"+str(created_rec["id"])+"/like")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_rec = resp.get_json()
+        self.assertEqual(updated_rec["liked"], True, "pid does not match")
+
+    def test_unlike(self):
+        """It should unlike the given recommendation"""
+        pid = 100
+        rec = make_recommendation(pid, 200, RecommendationType.DEFAULT, True)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+
+        resp = self.client.put(BASE_URL+"/"+str(created_rec["id"])+"/unlike")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_rec = resp.get_json()
+        self.assertEqual(updated_rec["liked"], False, "pid does not match")
+
+    def test_like_unlike_not_found_recommendation(self):
+        """It should failed to like/unlike a non-exist recommendation"""
+        pid = 100
+        resp = self.client.put(BASE_URL+"/"+str(pid)+"/like")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+        resp = self.client.put(BASE_URL+"/"+str(pid)+"/unlike")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
