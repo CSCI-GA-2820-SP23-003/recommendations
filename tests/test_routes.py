@@ -61,6 +61,13 @@ class TestYourResourceServer(TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+    def test_health_check(self):
+        """ It should get the status ok """
+        resp = self.client.get("/health")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        resp_body = resp.get_json()
+        self.assertEqual(resp_body["status"], "OK")
+
     def test_get_recommendation_list(self):
         """It should get a list of Recommendations"""
         for i in range(5):
