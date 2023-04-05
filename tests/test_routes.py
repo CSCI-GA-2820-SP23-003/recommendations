@@ -327,10 +327,12 @@ class TestRecommendationRoutes(TestCase):
         resp = self.client.get(BASE_URL+"?pid=100&amount=3&type=cross-sell")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(data['type'], "accessory")
+        for i in range(3):
+            self.assertEqual(data[i]['type'], "cross-sell")
 
         # Only type
         resp = self.client.get(BASE_URL+"?type=cross-sell")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(data['type'], "cross-sell")
+        for i in range(5):
+            self.assertEqual(data[i]['type'], "cross-sell")
