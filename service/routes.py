@@ -76,8 +76,8 @@ def list_recommendations():  # noqa: C901
                 results.append(recommendation.serialize())
 
     result = results
-    if rec_type is not None:
-        if rec_type != "default" or rec_type != "cross-sell" or rec_type != "up-sell" or \
+    if rec_type != "default":
+        if rec_type != "cross-sell" or rec_type != "up-sell" or \
                 rec_type != "accessory" or rec_type != "frequently_together":
             abort(
                 status.HTTP_400_BAD_REQUEST,
