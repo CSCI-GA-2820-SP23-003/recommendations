@@ -76,8 +76,7 @@ def list_recommendations():  # noqa: C901
                 results.append(recommendation.serialize())
 
     result = results
-    if rec_type == "cross-sell" or rec_type == "up-sell" or \
-            rec_type == "accessory" or rec_type == "frequently_together":
+    if rec_type in ('cross-sell', 'up-sell', 'accessory', 'frequently_together'):
         result = []
         for recommendation in results:
             if recommendation.type == rec_type:
