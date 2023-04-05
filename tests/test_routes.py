@@ -83,6 +83,70 @@ class TestRecommendationRoutes(TestCase):
         data = resp.get_json()
         self.assertEqual(len(data), 15)
 
+    def test_get_specific_type_recommendation_list(self):
+        """It should get a list of Recommendations of specific type"""
+        for i in range(5):
+            for j in range(3):
+                if i == 4:
+                    rec = make_recommendation(i, j, rec_type="cross-sell")
+                else:
+                    rec = make_recommendation(i, j)
+                resp = self.client.post(
+                    BASE_URL, json=rec.serialize(), content_type="application/json"
+                )
+
+        resp = self.client.get(BASE_URL+"?type=cross-sell")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+
+    def test_get_specific_type_recommendation_list_wrong_param(self):
+        """It should get a list of Recommendations of specific type"""
+        for i in range(5):
+            for j in range(3):
+                if i == 4:
+                    rec = make_recommendation(i, j, rec_type="cross-sell")
+                else:
+                    rec = make_recommendation(i, j)
+                resp = self.client.post(
+                    BASE_URL, json=rec.serialize(), content_type="application/json"
+                )
+
+        resp = self.client.get(BASE_URL+"?type=mixed_recommendations")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_liked_recommendation_list(self):
+        """It should get a list of Recommendations based on the liked type"""
+        for i in range(5):
+            for j in range(3):
+                if i == 4:
+                    rec = make_recommendation(i, j, liked=True)
+                else:
+                    rec = make_recommendation(i, j)
+                resp = self.client.post(
+                    BASE_URL, json=rec.serialize(), content_type="application/json"
+                )
+
+        resp = self.client.get(BASE_URL+"?liked=true")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+
+    def test_get_liked_recommendation_list_wrong_param(self):
+        """It should get a list of Recommendations based on the liked type"""
+        for i in range(5):
+            for j in range(3):
+                if i == 4:
+                    rec = make_recommendation(i, j, liked=True)
+                else:
+                    rec = make_recommendation(i, j)
+                resp = self.client.post(
+                    BASE_URL, json=rec.serialize(), content_type="application/json"
+                )
+
+        resp = self.client.get(BASE_URL+"?liked=trueee")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_create(self):
         """It should Create a new Recommendation"""
         rec = make_recommendation(100, 200)

@@ -43,12 +43,41 @@ def health():
 ######################################################################
 # LIST ALL RECOMMENDATIONS
 ######################################################################
+def get_recommendation_based_on_filter(rec_type, liked):
+    """Returns list of the Recommendations with or without specific type and liked filters"""
+    recommendations = []
+
+    if rec_type is not None:
+        if rec_type in set(['cross-sell', 'up-sell', 'accessory', 'frequently_together']):
+            recommendations = Recommendation.find_by_type(rec_type)
+        else:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Type '{rec_type}' is an invalid recommendation type.",
+            )
+    elif liked is not None:
+        if liked in set(['true', 'false']):
+            recommendations = Recommendation.find_by_liked(liked)
+        else:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"liked = '{liked}' is an invalid liked type.",
+            )
+    else:
+        recommendations = Recommendation.all()
+
+    return recommendations
+
+
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
     """Returns list of the Recommendations"""
     app.logger.info("Request for Recommendations list")
 
-    recommendations = Recommendation.all()
+    rec_type = request.args.get("type", default=None, type=str)
+    liked = request.args.get("liked", default=None, type=str)
+    recommendations = get_recommendation_based_on_filter(rec_type, liked)
+
     pid = None
     amount = None
 
