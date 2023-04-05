@@ -166,6 +166,23 @@ class TestRecommendationRoutes(TestCase):
         resp = self.client.put(BASE_URL+"/9999", json=body, content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_update_badrequest(self):
+        """It should give a bad request error when input doesn't contain required fields for update"""
+        pid = 100
+        rec = make_recommendation(pid, 200)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+        
+        body = {"pid": pid}
+        resp = self.client.put(
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_update_type(self):
         """It should update the given recommendation type"""
         pid = 400
