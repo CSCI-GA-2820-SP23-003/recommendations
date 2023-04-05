@@ -77,6 +77,7 @@ def list_recommendations():  # noqa: C901
 
     result = results
     if rec_type != "default":
+        print(rec_type)
         if rec_type != "cross-sell" or rec_type != "up-sell" or \
                 rec_type != "accessory" or rec_type != "frequently_together":
             abort(
