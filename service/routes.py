@@ -77,7 +77,7 @@ def list_recommendations():  # noqa: C901
 
     result = results
     if rec_type == "cross-sell" or rec_type == "up-sell" or \
-         rec_type == "accessory" or rec_type == "frequently_together":
+            rec_type == "accessory" or rec_type == "frequently_together":
         result = []
         for recommendation in results:
             if recommendation.type == rec_type:
