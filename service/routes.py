@@ -51,6 +51,7 @@ def list_recommendations():
     recommendations = Recommendation.all()
     pid = None
     amount = None
+    rec_type = None
 
     try:
         pid = int(request.args.get('pid'))
@@ -62,6 +63,12 @@ def list_recommendations():
     except TypeError:  # pylint: disable=broad-except
         pass
 
+    try:
+        rec_type = str(request.args.get('type'))
+    except TypeError:  # pylint: disable=broad-except
+        pass
+
+
     if pid is not None:
         results = []
         for recommendation in recommendations:
@@ -70,6 +77,18 @@ def list_recommendations():
     else:
         results = [recommendation.serialize() for recommendation in recommendations]
 
+    if rec_type is not None:
+        if rec_type != "cross-sell" or rec_type != "up-sell" or \
+            rec_type != "accessory" or rec_type != "frequently_together":
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Recommendation with incorrect type '{rec_type}' is invalid.",
+            )
+        else:
+            for recommendation in results:
+                if recommendation.type == rec_type:
+                    results.append(recommendation.serialize())
+
     if amount is not None:
         # Get top k recommendations (Sort first if adding priority)
         result = results[0:amount]
@@ -77,7 +96,6 @@ def list_recommendations():
         result = results
 
     return make_response(jsonify(result), status.HTTP_200_OK)
-
 
 ######################################################################
 # RETRIEVE A RECOMMENDATION
