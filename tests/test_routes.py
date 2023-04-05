@@ -310,3 +310,28 @@ class TestRecommendationRoutes(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 1)
+
+    def test_get_spec_type_recommendation(self):
+        """It should GET a specific type of Recommendations"""
+        i = 100
+        for j in range(5):
+            rec = make_recommendation(i, j)
+            resp = self.client.post(
+                BASE_URL, json=rec.serialize(), content_type="application/json"
+            )
+        # bad type
+        resp = self.client.get(BASE_URL+"?pid=100&type=accessories")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # pid and amount and type
+        resp = self.client.get(BASE_URL+"?pid=100&amount=3&type=accessory")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data['type'], "accessory")
+
+
+        # Only type
+        resp = self.client.get(BASE_URL+"?type=cross-sell")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data['type'], "cross-sell")

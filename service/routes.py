@@ -78,8 +78,9 @@ def list_recommendations():
     else:
         results = [recommendation.serialize() for recommendation in recommendations]
 
+    result = []
     if rec_type is not None:
-        if rec_type != "cross-sell" or rec_type != "up-sell" or \
+        if rec_type != "default" or rec_type != "cross-sell" or rec_type != "up-sell" or \
             rec_type != "accessory" or rec_type != "frequently_together":
             abort(
                 status.HTTP_400_BAD_REQUEST,
@@ -88,13 +89,15 @@ def list_recommendations():
         else:
             for recommendation in results:
                 if recommendation.type == rec_type:
-                    results.append(recommendation.serialize())
+                    result.append(recommendation.serialize())
+    else:
+        result = results
 
     if amount is not None:
         # Get top k recommendations (Sort first if adding priority)
-        result = results[0:amount]
-    else:
-        result = results
+        result = result[0:amount]
+    # else:
+    #     result = result
 
     return make_response(jsonify(result), status.HTTP_200_OK)
 
@@ -186,32 +189,6 @@ def update(recommendation_id):
     return make_response(
         jsonify(message), status.HTTP_200_OK
     )
-
-######################################################################
-# RETURN SPECIFIC TYPE OF RECOMMENDATIONS
-######################################################################
-@app.route("/recommendations", methods=["GET"])
-def return_type():
-    """
-    This will return a specific type of recommendations
-    """
-
-    app.logger.info("Request for Recommendations list of a specific type")
-
-    rec_type = flask.request.args.get("type", type=str)
-    if type != "cross-sell" or type != "up-sell" or \
-       type != "accessory" or type != "frequently_together":
-        flask.abort(400)
-
-    results = []
-    recommendations = Recommendation.all()
-    for recommendation in recommendations:
-        if recommendation.type == rec_type:
-            results.append(recommendation.serialize())
-
-
-    return make_response(jsonify(results), status.HTTP_200_OK)
-
 
 
 ######################################################################
