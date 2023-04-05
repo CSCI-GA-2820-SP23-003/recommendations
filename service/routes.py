@@ -42,31 +42,27 @@ def list_recommendations():
 
     try:
         pid = int(request.args.get('pid'))
+    except TypeError:  # pylint: disable=broad-except
+        pass
+
+    try:
         amount = int(request.args.get('amount'))
     except TypeError:  # pylint: disable=broad-except
         pass
 
-    # Filter by pid, then amount
     if pid is not None:
         results = []
         for recommendation in recommendations:
             if recommendation.pid == pid:
                 results.append(recommendation.serialize())
-
-        if amount is not None:
-            # amount larger than the records_num
-            if amount > len(results):
-                abort(
-                    status.HTTP_400_BAD_REQUEST,
-                    f"Amount '{amount}' is too large",
-                )
-            # Get top k recommendations (Sort first if adding priority)
-            result = results[0:amount]
-        else:
-            result = results
     else:
-        # Return the whole list as an array of dictionaries
-        result = [recommendation.serialize() for recommendation in recommendations]
+        results = [recommendation.serialize() for recommendation in recommendations]
+
+    if amount is not None:
+        # Get top k recommendations (Sort first if adding priority)
+        result = results[0:amount]
+    else:
+        result = results
 
     return make_response(jsonify(result), status.HTTP_200_OK)
 
