@@ -175,7 +175,6 @@ class TestRecommendationRoutes(TestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         created_rec = resp.get_json()
-        
         body = {"pid": pid}
         resp = self.client.put(
             BASE_URL+"/"+str(created_rec["id"]), json=body,
