@@ -4,6 +4,7 @@ My Service
 Describe what your service does here
 """
 
+import flask
 from flask import jsonify, request, url_for, make_response, abort
 from service.common import status  # HTTP Status Codes
 from service.models import Recommendation
@@ -132,6 +133,32 @@ def update(recommendation_id):
     return make_response(
         jsonify(message), status.HTTP_200_OK
     )
+
+######################################################################
+# RETURN SPECIFIC TYPE OF RECOMMENDATIONS
+######################################################################
+@app.route("/recommendations", methods=["GET"])
+def return_type():
+    """
+    This will return a specific type of recommendations
+    """
+
+    app.logger.info("Request for Recommendations list of a specific type")
+
+    rec_type = flask.request.args.get("type", type=str)
+    if type != "cross-sell" or type != "up-sell" or \
+       type != "accessory" or type != "frequently_together":
+        flask.abort(400)
+
+    results = []
+    recommendations = Recommendation.all()
+    for recommendation in recommendations:
+        if recommendation.type == rec_type:
+            results.append(recommendation.serialize())
+
+
+    return make_response(jsonify(results), status.HTTP_200_OK)
+
 
 
 ######################################################################
