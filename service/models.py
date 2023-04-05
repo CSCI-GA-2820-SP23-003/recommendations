@@ -138,3 +138,23 @@ class Recommendation(db.Model):
         """
         logger.info("Processing pid query for %s ...", pid)
         return cls.query.filter(cls.pid == pid)
+
+    @classmethod
+    def find_by_type(cls, rec_type):
+        """Returns all Recommendations of the given type
+
+        Args:
+            rec_type (string): the type of the Recommendations you want to match
+        """
+        logger.info("Processing type filter query for type %s ...", rec_type)
+        return cls.query.filter(cls.type == rec_type)
+
+    @classmethod
+    def find_by_liked(cls, liked):
+        """Returns all Recommendation filtered by likes
+
+        Args:
+            liked (bool): like criteria based on which you want to match the Recommendations
+        """
+        logger.info("Processing liked filter query for liked %s ...", liked)
+        return cls.query.filter(cls.liked == liked)

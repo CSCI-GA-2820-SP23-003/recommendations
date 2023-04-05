@@ -127,6 +127,9 @@ class TestRecommendation(unittest.TestCase):
 
         # Assert that there are 5*3=15 recommendations in the database
         all_rec = Recommendation.all()
+        print("==========")
+        print(all_rec)
+        print("==========")
         self.assertEqual(len(all_rec), 15)
 
         # each pid has 3 recommended pids
@@ -212,3 +215,35 @@ class TestRecommendation(unittest.TestCase):
         """It should not Deserialize a recommendation with a TypeError"""
         rec = Recommendation()
         self.assertRaises(DataValidationError, rec.deserialize, [])
+
+    def test_specific_type_recommendations(self):
+        """It should List Recommendations of specific given type in the database"""
+        recommendations = Recommendation.find_by_type("cross-sell").all()
+        self.assertEqual(recommendations, [])
+
+        for i in range(5):
+            for j in range(3):
+                if i == 4:
+                    make_recommendation(i, j, rec_type="cross-sell").create()
+                else:
+                    make_recommendation(i, j).create()
+
+        # Assert that there are 5*3=15 recommendations in the database & 3 recommendations with type 'cross-sell'
+        recommendations = Recommendation.find_by_type("cross-sell").all()
+        self.assertEqual(len(recommendations), 3)
+
+    def test_liked_recommendations(self):
+        """It should List Recommendations that are liked in the database"""
+        recommendations = Recommendation.find_by_liked(True).all()
+        self.assertEqual(recommendations, [])
+
+        for i in range(5):
+            for j in range(3):
+                if i == 4:
+                    make_recommendation(i, j, liked=True).create()
+                else:
+                    make_recommendation(i, j).create()
+
+        # Assert that there are 5*3=15 recommendations in the database & 3 recommendations with liked 'True'
+        recommendations = Recommendation.find_by_liked(True).all()
+        self.assertEqual(len(recommendations), 3)

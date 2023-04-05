@@ -4,6 +4,7 @@ My Service
 Describe what your service does here
 """
 
+import flask
 from flask import jsonify, request, url_for, make_response, abort
 from service.common import status  # HTTP Status Codes
 from service.models import Recommendation
@@ -36,7 +37,27 @@ def list_recommendations():
     """Returns all of the Recommendations"""
     app.logger.info("Request for Recommendations list")
 
-    recommendations = Recommendation.all()
+    recommendations = []
+    rec_type = flask.request.args.get("type", default=None, type=str)
+    liked = flask.request.args.get("liked", default=None, type=str)
+    if rec_type is not None:
+        if rec_type in set(['cross-sell', 'up-sell', 'accessory', 'frequently_together']):
+            recommendations = Recommendation.find_by_type(rec_type)
+        else:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Type '{rec_type}' is an invalid recommendation type.",
+            )
+    elif liked is not None:
+        if liked in set(['true', 'false']):
+            recommendations = Recommendation.find_by_liked(liked)
+        else:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"liked = '{liked}' is an invalid liked type.",
+            )
+    else:
+        recommendations = Recommendation.all()
 
     # Return as an array of dictionaries
     results = [recommendation.serialize() for recommendation in recommendations]
