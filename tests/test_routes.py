@@ -260,3 +260,29 @@ class TestYourResourceServer(TestCase):
 
         resp = self.client.put(BASE_URL+"/"+str(pid)+"/unlike")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_k_recommendation(self):
+        """It should GET k Recommendations"""
+        i = 100
+        for j in range(5):
+            rec = make_recommendation(i, j)
+            resp = self.client.post(
+                BASE_URL, json=rec.serialize(), content_type="application/json"
+            )
+        # pid and amount
+        resp = self.client.get(BASE_URL+"?pid=100&amount=3")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+
+        # Only pid
+        resp = self.client.get(BASE_URL+"?pid=100")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 5)
+
+        # Only amount
+        resp = self.client.get(BASE_URL+"?amount=1")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 1)
