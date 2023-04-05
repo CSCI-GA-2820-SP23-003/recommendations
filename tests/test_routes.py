@@ -1,5 +1,5 @@
 """
-TestYourResourceModel API Service Test Suite
+TestRecommendationRoutes API Service Test Suite
 
 Test cases can be run with the following:
   nosetests -v --with-spec --spec-color
@@ -25,7 +25,8 @@ BASE_URL = "/recommendations"
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
-class TestYourResourceServer(TestCase):
+# pylint: disable=R0904
+class TestRecommendationRoutes(TestCase):
     """ REST API Server Tests """
 
     @classmethod
