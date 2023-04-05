@@ -270,11 +270,11 @@ class TestYourResourceServer(TestCase):
                 BASE_URL, json=rec.serialize(), content_type="application/json"
             )
 
-        resp = self.client.get(BASE_URL+"/"+str(100)+"/get-k/3")
+        resp = self.client.get(BASE_URL+"/list?pid="+str(100)+"&amount=3")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 3)
 
         # Bad request
-        resp = self.client.get(BASE_URL+"/"+str(100)+"/get-k/7")
+        resp = self.client.get(BASE_URL+"/list?pid="+str(100)+"&amount=7")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
