@@ -69,17 +69,20 @@ def get_recommendation(recommendation_id):
 ######################################################################
 # RETURN SPECIFIC AMOUNT OF RECOMMENDATIONS
 ######################################################################
-@app.route("/recommendations/<int:recommendation_pid>/get-k/<int:amount>", methods=["GET"])
-def return_k(recommendation_pid, amount):
+@app.route("/recommendations/list", methods=["GET"])
+def return_k():
     """
     This will return k recommendations for <rec_pid> where k is a given int
     """
+    pid = int(request.args.get('pid'))
+    amount = int(request.args.get('amount'))
+
     app.logger.info("Request for %s Recommendations", amount)
 
     results = []
     recommendations = Recommendation.all()
     for recommendation in recommendations:
-        if recommendation.pid == recommendation_pid:
+        if recommendation.pid == pid:
             results.append(recommendation.serialize())
 
     # amount larger than the records_num
