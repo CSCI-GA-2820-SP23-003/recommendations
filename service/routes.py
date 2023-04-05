@@ -44,7 +44,7 @@ def health():
 # LIST ALL RECOMMENDATIONS
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
-def list_recommendations(): # noqa: C901
+def list_recommendations():  # noqa: C901
     """Returns list of the Recommendations"""
     app.logger.info("Request for Recommendations list")
 
