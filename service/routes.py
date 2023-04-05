@@ -78,9 +78,9 @@ def list_recommendations():  # noqa: C901
     result = results
     if rec_type in ('cross-sell', 'up-sell', 'accessory', 'frequently_together'):
         result = []
-        for recommendation in results:
-            if recommendation.type == rec_type:
-                result.append(recommendation.serialize())
+        for rec_dict in results:
+            if rec_dict['type'] == rec_type:
+                result.append(rec_dict)
 
     if amount is not None:
         # Get top k recommendations (Sort first if adding priority)
