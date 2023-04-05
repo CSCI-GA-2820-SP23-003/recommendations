@@ -33,15 +33,42 @@ def index():
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
-    """Returns all of the Recommendations"""
+    """Returns list of the Recommendations"""
     app.logger.info("Request for Recommendations list")
 
     recommendations = Recommendation.all()
+    pid = None
+    amount = None
 
-    # Return as an array of dictionaries
-    results = [recommendation.serialize() for recommendation in recommendations]
+    try:
+        pid = int(request.args.get('pid'))
+        amount = int(request.args.get('amount'))
+    except Exception:
+        pass
 
-    return make_response(jsonify(results), status.HTTP_200_OK)
+    # Filter by pid, then amount
+    if pid is not None:
+        results = []
+        for recommendation in recommendations:
+            if recommendation.pid == pid:
+                results.append(recommendation.serialize())
+
+        if amount is not None:
+            # amount larger than the records_num
+            if amount > len(results):
+                abort(
+                    status.HTTP_400_BAD_REQUEST,
+                    f"Amount '{amount}' is too large",
+                )
+            # Get top k recommendations (Sort first if adding priority)
+            result = results[0:amount]
+        else:
+            result = results
+    else:
+        # Return the whole list as an array of dictionaries
+        result = [recommendation.serialize() for recommendation in recommendations]
+
+    return make_response(jsonify(result), status.HTTP_200_OK)
 
 
 ######################################################################
@@ -64,38 +91,6 @@ def get_recommendation(recommendation_id):
         )
 
     return make_response(jsonify(rec.serialize()), status.HTTP_200_OK)
-
-
-######################################################################
-# RETURN SPECIFIC AMOUNT OF RECOMMENDATIONS
-######################################################################
-@app.route("/recommendations/list", methods=["GET"])
-def return_k():
-    """
-    This will return k recommendations for <rec_pid> where k is a given int
-    """
-    pid = int(request.args.get('pid'))
-    amount = int(request.args.get('amount'))
-
-    app.logger.info("Request for %s Recommendations", amount)
-
-    results = []
-    recommendations = Recommendation.all()
-    for recommendation in recommendations:
-        if recommendation.pid == pid:
-            results.append(recommendation.serialize())
-
-    # amount larger than the records_num
-    if amount > len(results):
-        abort(
-            status.HTTP_400_BAD_REQUEST,
-            f"Amount '{amount}' is too large",
-        )
-
-    # Get top k recommendations (Sort first if adding priority)
-    result = results[0:amount]
-
-    return make_response(jsonify(result), status.HTTP_200_OK)
 
 
 ######################################################################
