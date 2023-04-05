@@ -76,19 +76,18 @@ def list_recommendations():  # noqa: C901
                 results.append(recommendation.serialize())
 
     result = results
-    if rec_type != "default":
-        print(rec_type)
-        if rec_type != "cross-sell" or rec_type != "up-sell" or \
-                rec_type != "accessory" or rec_type != "frequently_together":
-            abort(
-                status.HTTP_400_BAD_REQUEST,
-                f"Recommendation with incorrect type '{rec_type}' is invalid.",
-            )
-        else:
-            result = []
-            for recommendation in results:
-                if recommendation.type == rec_type:
-                    result.append(recommendation.serialize())
+    if rec_type is not None:
+        # if rec_type != "cross-sell" or rec_type != "up-sell" or \
+        #         rec_type != "accessory" or rec_type != "frequently_together":
+        #     abort(
+        #         status.HTTP_400_BAD_REQUEST,
+        #         f"Recommendation with incorrect type '{rec_type}' is invalid.",
+        #     )
+        # else:
+        result = []
+        for recommendation in results:
+            if recommendation.type == rec_type:
+                result.append(recommendation.serialize())
 
     if amount is not None:
         # Get top k recommendations (Sort first if adding priority)
