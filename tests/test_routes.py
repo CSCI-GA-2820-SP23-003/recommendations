@@ -285,7 +285,7 @@ class TestYourResourceServer(TestCase):
             resp = self.client.post(
                 BASE_URL, json=rec.serialize(), content_type="application/json"
             )
-
+        # pid and amount
         resp = self.client.get(BASE_URL+"?pid="+str(100)+"&amount=3")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
@@ -297,6 +297,8 @@ class TestYourResourceServer(TestCase):
         data = resp.get_json()
         self.assertEqual(len(data), 5)
 
-        # Bad request
-        resp = self.client.get(BASE_URL+"?pid="+str(100)+"&amount=7")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        # Only amount
+        resp = self.client.get(BASE_URL+"?amount="+1)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 1)
