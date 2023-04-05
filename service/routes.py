@@ -30,11 +30,23 @@ def index():
 
 
 ######################################################################
+# HEALTH CHECK
+######################################################################
+@app.route("/health")
+def health():
+    """ For health check """
+    return (
+        {"status": "OK"},
+        status.HTTP_200_OK,
+    )
+
+
+######################################################################
 # LIST ALL RECOMMENDATIONS
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
-    """Returns all of the Recommendations"""
+    """Returns list of the Recommendations"""
     app.logger.info("Request for Recommendations list")
 
     recommendations = []
@@ -58,11 +70,35 @@ def list_recommendations():
             )
     else:
         recommendations = Recommendation.all()
+    
+    pid = None
+    amount = None
 
-    # Return as an array of dictionaries
-    results = [recommendation.serialize() for recommendation in recommendations]
+    try:
+        pid = int(request.args.get('pid'))
+    except TypeError:  # pylint: disable=broad-except
+        pass
 
-    return make_response(jsonify(results), status.HTTP_200_OK)
+    try:
+        amount = int(request.args.get('amount'))
+    except TypeError:  # pylint: disable=broad-except
+        pass
+
+    if pid is not None:
+        results = []
+        for recommendation in recommendations:
+            if recommendation.pid == pid:
+                results.append(recommendation.serialize())
+    else:
+        results = [recommendation.serialize() for recommendation in recommendations]
+
+    if amount is not None:
+        # Get top k recommendations (Sort first if adding priority)
+        result = results[0:amount]
+    else:
+        result = results
+
+    return make_response(jsonify(result), status.HTTP_200_OK)
 
 
 ######################################################################

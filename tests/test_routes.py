@@ -1,5 +1,5 @@
 """
-TestYourResourceModel API Service Test Suite
+TestRecommendationRoutes API Service Test Suite
 
 Test cases can be run with the following:
   nosetests -v --with-spec --spec-color
@@ -23,9 +23,10 @@ BASE_URL = "/recommendations"
 
 
 ######################################################################
-#  T E S T   C A S E S
+#  T E S T    C A S E S
 ######################################################################
-class TestYourResourceServer(TestCase):
+# pylint: disable=R0904
+class TestRecommendationRoutes(TestCase):
     """ REST API Server Tests """
 
     @classmethod
@@ -60,6 +61,13 @@ class TestYourResourceServer(TestCase):
         """ It should call the home page """
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_health_check(self):
+        """ It should get the status ok """
+        resp = self.client.get("/health")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        resp_body = resp.get_json()
+        self.assertEqual(resp_body["status"], "OK")
 
     def test_get_recommendation_list(self):
         """It should get a list of Recommendations"""
@@ -222,6 +230,22 @@ class TestYourResourceServer(TestCase):
         resp = self.client.put(BASE_URL+"/9999", json=body, content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_update_badrequest(self):
+        """It should give a bad request error when input doesn't contain required fields for update"""
+        pid = 100
+        rec = make_recommendation(pid, 200)
+        resp = self.client.post(
+            BASE_URL, json=rec.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        created_rec = resp.get_json()
+        body = {"pid": pid}
+        resp = self.client.put(
+            BASE_URL+"/"+str(created_rec["id"]), json=body,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_update_type(self):
         """It should update the given recommendation type"""
         pid = 400
@@ -324,3 +348,29 @@ class TestYourResourceServer(TestCase):
 
         resp = self.client.put(BASE_URL+"/"+str(pid)+"/unlike")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_k_recommendation(self):
+        """It should GET k Recommendations"""
+        i = 100
+        for j in range(5):
+            rec = make_recommendation(i, j)
+            resp = self.client.post(
+                BASE_URL, json=rec.serialize(), content_type="application/json"
+            )
+        # pid and amount
+        resp = self.client.get(BASE_URL+"?pid=100&amount=3")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+
+        # Only pid
+        resp = self.client.get(BASE_URL+"?pid=100")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 5)
+
+        # Only amount
+        resp = self.client.get(BASE_URL+"?amount=1")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 1)
