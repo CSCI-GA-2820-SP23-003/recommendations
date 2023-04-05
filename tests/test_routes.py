@@ -329,7 +329,6 @@ class TestRecommendationRoutes(TestCase):
         data = resp.get_json()
         self.assertEqual(data['type'], "accessory")
 
-
         # Only type
         resp = self.client.get(BASE_URL+"?type=cross-sell")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)

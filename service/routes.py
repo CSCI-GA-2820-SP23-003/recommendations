@@ -68,15 +68,14 @@ def list_recommendations():
     except TypeError:  # pylint: disable=broad-except
         pass
 
+    results = [recommendation.serialize() for recommendation in recommendations]
     if pid is not None:
         results = []
         for recommendation in recommendations:
             if recommendation.pid == pid:
                 results.append(recommendation.serialize())
-    else:
-        results = [recommendation.serialize() for recommendation in recommendations]
 
-    result = []
+    result = results
     if rec_type is not None:
         if rec_type != "default" or rec_type != "cross-sell" or rec_type != "up-sell" or \
                 rec_type != "accessory" or rec_type != "frequently_together":
@@ -85,11 +84,10 @@ def list_recommendations():
                 f"Recommendation with incorrect type '{rec_type}' is invalid.",
             )
         else:
+            result = []
             for recommendation in results:
                 if recommendation.type == rec_type:
                     result.append(recommendation.serialize())
-    else:
-        result = results
 
     if amount is not None:
         # Get top k recommendations (Sort first if adding priority)
