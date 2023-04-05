@@ -43,7 +43,7 @@ def list_recommendations():
     try:
         pid = int(request.args.get('pid'))
         amount = int(request.args.get('amount'))
-    except Exception:
+    except (TypeError, Exception):
         pass
 
     # Filter by pid, then amount
