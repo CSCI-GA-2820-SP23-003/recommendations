@@ -30,20 +30,73 @@ def index():
 
 
 ######################################################################
+# HEALTH CHECK
+######################################################################
+@app.route("/health")
+def health():
+    """ For health check """
+    return (
+        {"status": "OK"},
+        status.HTTP_200_OK,
+    )
+
+
+######################################################################
 # LIST ALL RECOMMENDATIONS
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
-    """Returns all of the Recommendations"""
+    """Returns list of the Recommendations"""
     app.logger.info("Request for Recommendations list")
 
     recommendations = Recommendation.all()
+    pid = None
+    amount = None
+    rec_type = None
 
-    # Return as an array of dictionaries
-    results = [recommendation.serialize() for recommendation in recommendations]
+    try:
+        pid = int(request.args.get('pid'))
+    except TypeError:  # pylint: disable=broad-except
+        pass
 
-    return make_response(jsonify(results), status.HTTP_200_OK)
+    try:
+        amount = int(request.args.get('amount'))
+    except TypeError:  # pylint: disable=broad-except
+        pass
 
+    try:
+        rec_type = str(request.args.get('type'))
+    except TypeError:  # pylint: disable=broad-except
+        pass
+
+
+    if pid is not None:
+        results = []
+        for recommendation in recommendations:
+            if recommendation.pid == pid:
+                results.append(recommendation.serialize())
+    else:
+        results = [recommendation.serialize() for recommendation in recommendations]
+
+    if rec_type is not None:
+        if rec_type != "cross-sell" or rec_type != "up-sell" or \
+            rec_type != "accessory" or rec_type != "frequently_together":
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Recommendation with incorrect type '{rec_type}' is invalid.",
+            )
+        else:
+            for recommendation in results:
+                if recommendation.type == rec_type:
+                    results.append(recommendation.serialize())
+
+    if amount is not None:
+        # Get top k recommendations (Sort first if adding priority)
+        result = results[0:amount]
+    else:
+        result = results
+
+    return make_response(jsonify(result), status.HTTP_200_OK)
 
 ######################################################################
 # RETRIEVE A RECOMMENDATION
