@@ -4,7 +4,6 @@ My Service
 Describe what your service does here
 """
 
-import flask
 from flask import jsonify, request, url_for, make_response, abort
 from service.common import status  # HTTP Status Codes
 from service.models import Recommendation
@@ -44,14 +43,10 @@ def health():
 ######################################################################
 # LIST ALL RECOMMENDATIONS
 ######################################################################
-@app.route("/recommendations", methods=["GET"])
-def list_recommendations():
-    """Returns list of the Recommendations"""
-    app.logger.info("Request for Recommendations list")
-
+def get_recommendation_based_on_filter(request):
     recommendations = []
-    rec_type = flask.request.args.get("type", default=None, type=str)
-    liked = flask.request.args.get("liked", default=None, type=str)
+    rec_type = request.args.get("type", default=None, type=str)
+    liked = request.args.get("liked", default=None, type=str)
     if rec_type is not None:
         if rec_type in set(['cross-sell', 'up-sell', 'accessory', 'frequently_together']):
             recommendations = Recommendation.find_by_type(rec_type)
@@ -70,7 +65,17 @@ def list_recommendations():
             )
     else:
         recommendations = Recommendation.all()
-    
+
+    return recommendations
+
+
+@app.route("/recommendations", methods=["GET"])
+def list_recommendations():
+    """Returns list of the Recommendations"""
+    app.logger.info("Request for Recommendations list")
+
+    recommendations = get_recommendation_based_on_filter(request)
+
     pid = None
     amount = None
 
