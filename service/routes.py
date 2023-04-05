@@ -4,7 +4,6 @@ My Service
 Describe what your service does here
 """
 
-import flask
 from flask import jsonify, request, url_for, make_response, abort
 from service.common import status  # HTTP Status Codes
 from service.models import Recommendation
@@ -69,7 +68,6 @@ def list_recommendations():
     except TypeError:  # pylint: disable=broad-except
         pass
 
-
     if pid is not None:
         results = []
         for recommendation in recommendations:
@@ -81,7 +79,7 @@ def list_recommendations():
     result = []
     if rec_type is not None:
         if rec_type != "default" or rec_type != "cross-sell" or rec_type != "up-sell" or \
-            rec_type != "accessory" or rec_type != "frequently_together":
+                rec_type != "accessory" or rec_type != "frequently_together":
             abort(
                 status.HTTP_400_BAD_REQUEST,
                 f"Recommendation with incorrect type '{rec_type}' is invalid.",
@@ -100,6 +98,7 @@ def list_recommendations():
     #     result = result
 
     return make_response(jsonify(result), status.HTTP_200_OK)
+
 
 ######################################################################
 # RETRIEVE A RECOMMENDATION
