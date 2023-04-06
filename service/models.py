@@ -158,3 +158,19 @@ class Recommendation(db.Model):
         """
         logger.info("Processing liked filter query for liked %s ...", liked)
         return cls.query.filter(cls.liked == liked)
+
+    @classmethod
+    def find_by_attributes(cls, rec_type=None, liked=None):
+        """Returns all Recommendation filtered by likes
+
+        Args:
+            liked (bool): like criteria based on which you want to match the Recommendations
+        """
+        logger.info("Processing liked filter query for liked %s ...", liked)
+        res = cls.query
+
+        if rec_type is not None:
+            res = res.filter(cls.type == rec_type)
+        if liked is not None:
+            res = res.filter(cls.liked == liked)
+        return res.all()

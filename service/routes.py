@@ -6,7 +6,7 @@ Describe what your service does here
 
 from flask import jsonify, request, url_for, make_response, abort
 from service.common import status  # HTTP Status Codes
-from service.models import Recommendation
+from service.models import Recommendation, RecommendationType
 
 # Import Flask application
 from . import app
@@ -46,25 +46,31 @@ def health():
 def get_recommendation_based_on_filter(rec_type, liked):
     """Returns list of the Recommendations with or without specific type and liked filters"""
     recommendations = []
+    cond_type = None
+    cond_liked = None
 
     if rec_type is not None:
-        if rec_type in set(['cross-sell', 'up-sell', 'accessory', 'frequently_together']):
-            recommendations = Recommendation.find_by_type(rec_type)
+        if rec_type in list(RecommendationType):
+            cond_type = rec_type
         else:
             abort(
                 status.HTTP_400_BAD_REQUEST,
                 f"Type '{rec_type}' is an invalid recommendation type.",
             )
-    elif liked is not None:
+
+    if liked is not None:
         if liked in set(['true', 'false']):
-            recommendations = Recommendation.find_by_liked(liked)
+            cond_liked = liked == 'true'
         else:
             abort(
                 status.HTTP_400_BAD_REQUEST,
                 f"liked = '{liked}' is an invalid liked type.",
             )
-    else:
+
+    if cond_type is None and cond_liked is None:
         recommendations = Recommendation.all()
+    else:
+        recommendations = Recommendation.find_by_attributes(rec_type=cond_type, liked=cond_liked)
 
     return recommendations
 

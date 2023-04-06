@@ -1,4 +1,4 @@
-# NYU DevOps Project Template
+# NYU DevOps Project - Recommendation
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Language-Python-blue.svg)](https://python.org/)
@@ -6,27 +6,22 @@
 [![Build Status](https://github.com/CSCI-GA-2820-SP23-003/recommendations/actions/workflows/tdd.yml/badge.svg)](https://github.com/CSCI-GA-2820-SP23-003/recommendations/actions)
 [![codecov](https://codecov.io/gh/CSCI-GA-2820-SP23-003/recommendations/branch/master/graph/badge.svg?token=MVEA3AV9VJ)](https://codecov.io/gh/CSCI-GA-2820-SP23-003/recommendations)
 
-This is a skeleton you can use to start your projects
 
 ## Overview
 
-This project template contains starter code for your class project. The `/service` folder contains your `models.py` file for your model and a `routes.py` file for your service. The `/tests` folder has test case starter code for testing the model and the service separately. All you need to do is add your functionality. You can use the [lab-flask-tdd](https://github.com/nyu-devops/lab-flask-tdd) for code examples to copy from.
-
-## Automatic Setup
-
-The best way to use this repo is to start your own repo using it as a git template. To do this just press the green **Use this template** button in GitHub and this will become the source for your repository.
+This project is the implementation of the Recommendation service. The `/service` folder contains the `models.py` file for the model and a `routes.py` file for the service. The `/tests` folder has test case starter code for testing the model and the service separately.
 
 ## APIs
 ```
 == Get the list of all recommendations
 GET /recommendations
-	-> 200 + [Recommendation{}, ...]
+    -> 200 + [Recommendation{}, ...]
     
 == Get a recommendation
 GET /recommendations/<pid>
     <- Path arg:
             pid : int ; product ID
-	-> 200 + Recommendation{}
+    -> 200 + Recommendation{}
     
 == Create a Recommendation
 POST /recommendations
@@ -34,7 +29,7 @@ POST /recommendations
             pid : int ; product ID
             recommended_pid : int: the recommended product ID
             type : int ; recommendation type
-	-> 201 + Recommendation{}
+    -> 201 + Recommendation{}
     
 == Update a recommendation
 PUT /recommendations/<pid>
@@ -44,13 +39,20 @@ PUT /recommendations/<pid>
             pid : int ; product ID
             recommended_pid : int: the recommended product ID
             type : int ; recommendation type
-	-> 200 + Recommendation{}
+    -> 200 + Recommendation{}
     
 == Delete a recommendation
 DELETE /recommendations/<pid>
     <- Path arg:
             pid : int ; product ID
-	-> 204 + EMPTY
+    -> 204 + EMPTY
+
+== Like/unlike a recommendation
+PUT /recommendations/<pid>/like
+PUT /recommendations/<pid>/unlike
+    <- Path arg:
+            pid : int ; product ID
+    -> 200 + Recommendation{}
 ```
 
 ## Manual Setup
