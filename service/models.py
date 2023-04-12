@@ -32,7 +32,7 @@ class RecommendationType(str, Enum):
     CROSS_SELL = 'cross-sell'
     UP_SELL = 'up-sell'
     ACCESSORY = 'accessory'
-    FREQUENTLY_TOGETHER = 'frequently_together'
+    FREQUENTLY_TOGETHER = 'frequently-together'
 
 
 class Recommendation(db.Model):
