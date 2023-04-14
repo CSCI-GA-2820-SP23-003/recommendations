@@ -78,6 +78,6 @@ build:	## Build all of the project Docker images
 	docker buildx build --file Dockerfile  --pull --platform=$(PLATFORM) --tag $(IMAGE) --load .
 
 .PHONY: push
-build:	## Push the Docker image
+push:	## Push the Docker image
 	$(info Pushing $(IMAGE)...)
 	docker push  $(IMAGE)
