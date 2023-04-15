@@ -1,5 +1,12 @@
 # These can be overidden with env vars.
-CLUSTER ?= nyu-devops
+REGISTRY ?= us.icr.io
+NAMESPACE ?= yjlo
+IMAGE_NAME ?= nyu-devops-recommendation
+IMAGE_TAG ?= 1.0
+IMAGE ?= $(REGISTRY)/$(NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
+# PLATFORM ?= "linux/amd64,linux/arm64"
+PLATFORM ?= "linux/amd64"
+CLUSTER ?= nyu-devops-recommendation
 
 .PHONY: help
 help: ## Display this help
@@ -65,3 +72,12 @@ depoy: ## Deploy the service on local Kubernetes
 	$(info Deploying service locally...)
 	kubectl apply -f deploy/
 
+.PHONY: build
+build:	## Build all of the project Docker images
+	$(info Building $(IMAGE) for $(PLATFORM)...)
+	docker buildx build --file Dockerfile  --pull --platform=$(PLATFORM) --tag $(IMAGE) --load .
+
+.PHONY: push
+push:	## Push the Docker image
+	$(info Pushing $(IMAGE)...)
+	docker push  $(IMAGE)
