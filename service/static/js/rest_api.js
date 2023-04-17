@@ -110,6 +110,61 @@ $(function () {
     });
 
     // ****************************************
+    // Like a Recommendation
+    // ****************************************
+
+    $("#like-btn").click(function () {
+
+        let rec_id = $("#rec_recommendation_id").val();
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `/recommendations/${rec_id}/like`,
+                contentType: "application/json",
+                data: ''
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            $("#search_results").empty()
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // ****************************************
+    // Unlike a Recommendation
+    // ****************************************
+
+    $("#unlike-btn").click(function () {
+
+        let rec_id = $("#rec_recommendation_id").val();
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `/recommendations/${rec_id}/unlike`,
+                contentType: "application/json",
+                data: ''
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            $("#search_results").empty()
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+    // ****************************************
     // Retrieve a Recommendation
     // ****************************************
 
