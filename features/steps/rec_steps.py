@@ -18,8 +18,8 @@ def step_impl(context):
     rest_endpoint = f"{context.BASE_URL}/recommendations"
     context.resp = requests.get(rest_endpoint)
     expect(context.resp.status_code).to_equal(200)
-    for pet in context.resp.json():
-        context.resp = requests.delete(f"{rest_endpoint}/{pet['id']}")
+    for recommendation in context.resp.json():
+        context.resp = requests.delete(f"{rest_endpoint}/{recommendation['id']}")
         expect(context.resp.status_code).to_equal(204)
 
     # load the database with new recommendations
