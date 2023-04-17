@@ -14,7 +14,7 @@ Background:
 
 Scenario: The server is running
     When I visit the "Home Page"
-    Then I should see "Recommendation REST API Service" in the title
+    Then I should see "Recommendation RESTful Service" in the title
     And I should not see "404 Not Found"
 
 Scenario: Create a Recommendation
@@ -33,7 +33,7 @@ Scenario: Create a Recommendation
     When I paste the "Recommendation ID" field
     And I press the "Retrieve" button
     Then I should see the message "Success"
-    And I should see "1000" in the "Recommendation ID" field
+    And I should see "1000" in the "Product ID" field
     And I should see "1001" in the "Recommended product ID" field
     And I should see "Up sell" in the "Type" dropdown
     And I should see "True" in the "Liked" dropdown

@@ -25,11 +25,10 @@ def step_impl(context):
     # load the database with new recommendations
     for row in context.table:
         payload = {
-            "Recommendation ID": row['id'],
-            "Product ID": row['pid'],
-            "Recommended product ID": row['recommended_pid'],
-            "Type": row['type'],
-            "Liked": row['liked']
+            "pid": row['pid'],
+            "recommended_pid": row['recommended_pid'],
+            "type": row['type'],
+            "liked": row['liked'] in ['True', 'true', '1']
         }
         context.resp = requests.post(rest_endpoint, json=payload)
         expect(context.resp.status_code).to_equal(201)

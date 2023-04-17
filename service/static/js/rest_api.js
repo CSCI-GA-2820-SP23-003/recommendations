@@ -6,9 +6,9 @@ $(function () {
 
     // Updates the form with data from the response
     function update_form_data(res) {
-        $("#rec_id").val(res.id);
-        $("#rec_pid").val(res.pid);
-        $("#rec_recommended_pid").val(res.recommended_pid);
+        $("#rec_recommendation_id").val(res.id);
+        $("#rec_product_id").val(res.pid);
+        $("#rec_recommended_product_id").val(res.recommended_pid);
         $("#rec_type").val(res.type);
         if (res.liked == true) {
             $("#rec_liked").val("true");
@@ -19,9 +19,9 @@ $(function () {
 
     /// Clears all form fields
     function clear_form_data() {
-        $("#rec_id").val("");
-        $("#rec_pid").val("");
-        $("#rec_recommended_pid").val("");
+        $("#rec_recommendation_id").val("");
+        $("#rec_product_id").val("");
+        $("#rec_recommended_product_id").val("");
         $("#rec_type").val("");
         $("#rec_liked").val("");
     }
@@ -38,8 +38,8 @@ $(function () {
 
     $("#create-btn").click(function () {
 
-        let pid = $("#rec_pid").val();
-        let recommended_pid = $("#rec_recommended_pid").val();
+        let pid = $("#rec_product_id").val();
+        let recommended_pid = $("#rec_recommended_product_id").val();
         let type = $("#rec_type").val();
         let liked = $("#rec_liked").val() == "true";
 
@@ -76,9 +76,9 @@ $(function () {
 
     $("#update-btn").click(function () {
 
-        let rec_id = $("#rec_id").val();
-        let pid = $("#rec_pid").val();
-        let recommended_pid = $("#rec_recommended_pid").val();
+        let rec_id = $("#rec_recommendation_id").val();
+        let pid = $("#rec_product_id").val();
+        let recommended_pid = $("#rec_recommended_product_id").val();
         let type = $("#rec_type").val();
         let liked = $("#rec_liked").val() == "true";
 
@@ -115,7 +115,7 @@ $(function () {
 
     $("#retrieve-btn").click(function () {
 
-        let rec_id = $("#rec_id").val();
+        let rec_id = $("#rec_recommendation_id").val();
 
         $("#flash_message").empty();
 
@@ -145,7 +145,7 @@ $(function () {
 
     $("#delete-btn").click(function () {
 
-        let rec_id = $("#rec_id").val();
+        let rec_id = $("#rec_recommendation_id").val();
 
         $("#flash_message").empty();
 
@@ -171,7 +171,7 @@ $(function () {
     // ****************************************
 
     $("#clear-btn").click(function () {
-        $("#rec_id").val("");
+        $("#rec_recommendation_id").val("");
         $("#flash_message").empty();
         clear_form_data()
     });
@@ -182,8 +182,8 @@ $(function () {
 
     $("#search-btn").click(function () {
 
-        let pid = $("#rec_pid").val();
-        let recommended_pid = $("#rec_recommended_pid").val();
+        let pid = $("#rec_product_id").val();
+        let recommended_pid = $("#rec_recommended_product_id").val();
         let type = $("#rec_type").val();
         let liked = $("#rec_liked").val();
 
