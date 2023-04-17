@@ -199,14 +199,14 @@ $(function () {
                 queryString += 'recommended_pid=' + recommended_pid
             }
         }
-        if (type !== null) {
+        if (type !== '#') {
             if (queryString.length > 0) {
                 queryString += '&type=' + type
             } else {
                 queryString += 'type=' + type
             }
         }
-        if (liked !== null) {
+        if (liked !== '#') {
             let liked_val = liked == 'true'
             if (queryString.length > 0) {
                 queryString += '&liked=' + liked_val
