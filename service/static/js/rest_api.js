@@ -22,8 +22,8 @@ $(function () {
         $("#rec_recommendation_id").val("");
         $("#rec_product_id").val("");
         $("#rec_recommended_product_id").val("");
-        $("#rec_type").val("");
-        $("#rec_liked").val("");
+        $("#rec_type").val("#");
+        $("#rec_liked").val("#");
     }
 
     // Updates the flash message area
