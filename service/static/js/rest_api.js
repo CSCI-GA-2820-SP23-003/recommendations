@@ -293,7 +293,7 @@ $(function () {
             let firstRec = "";
             for(let i = 0; i < res.length; i++) {
                 let rec = res[i];
-                table +=  `<tr id="row_${i}"><td>${rec.id}</td><td>${rec.pid}</td><td>${rec.recommended_pid}</td><td>${rec.type}</td><td>${rec.liked}</td></tr>`;
+                table +=  `<tr id="row_${i}"><td>ID_${rec.id}</td><td>${rec.pid}</td><td>${rec.recommended_pid}</td><td>${rec.type}</td><td>${rec.liked}</td></tr>`;
                 if (i == 0) {
                     firstRec = rec;
                 }
