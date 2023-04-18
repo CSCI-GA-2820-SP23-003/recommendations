@@ -45,3 +45,30 @@ Scenario: List all recommendations
     And I should see "100" in the results
     And I should see "200" in the results
     And I should not see "999" in the results
+
+Scenario: Delete a Recommendation
+    When I visit the "Home Page"
+    And I set the "Product ID" to "1000"
+    And I set the "Recommended product ID" to "1001"
+    And I select "Up sell" in the "Type" dropdown
+    And I select "True" in the "Liked" dropdown
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Recommendation ID" field
+    And I press the "Clear" button
+    Then the "Recommendation ID" field should be empty
+    And the "Product ID" field should be empty
+    And the "Recommended product ID" field should be empty
+    When I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "1000" in the results
+    When I press the "Clear" button
+    Then the "Recommendation ID" field should be empty
+    And the "Product ID" field should be empty
+    And the "Recommended product ID" field should be empty
+    When I paste the "Recommendation ID" field
+    And I press the "Delete" button
+    Then the "Recommendation ID" field should be empty
+    When I press the "Search" button
+    Then I should see the message "Success"
+    And I should not see "1000" in the results
