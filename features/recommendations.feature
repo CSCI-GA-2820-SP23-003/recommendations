@@ -37,3 +37,11 @@ Scenario: Create a Recommendation
     And I should see "1001" in the "Recommended product ID" field
     And I should see "Up sell" in the "Type" dropdown
     And I should see "True" in the "Liked" dropdown
+
+Scenario: List all recommendations
+    When I visit the "Home Page"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "100" in the results
+    And I should see "200" in the results
+    And I should not see "999" in the results

@@ -61,7 +61,8 @@
               <label class="control-label col-sm-2" for="rec_type">Type:</label>
               <div class="col-sm-10">
                 <select class="form-control" id="rec_type">
-                  <option value="default" selected>Default</option>
+                  <option value="#" selected></option>
+                  <option value="default">Default</option>
                   <option value="cross-sell">Cross sell</option>
                   <option value="up-sell">Up sell</option>
                   <option value="accessory">Accessory</option>
@@ -75,7 +76,8 @@
               <label class="control-label col-sm-2" for="rec_liked">Liked:</label>
               <div class="col-sm-10">
                 <select class="form-control" id="rec_liked">
-                  <option value="true" selected>True</option>
+                  <option value="#" selected></option>
+                  <option value="true">True</option>
                   <option value="false">False</option>
                 </select>
               </div>
@@ -88,6 +90,8 @@
                 <button type="submit" class="btn btn-primary" id="clear-btn">Clear</button>
                 <button type="submit" class="btn btn-success" id="create-btn">Create</button>
                 <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
+                <button type="submit" class="btn btn-warning" id="like-btn">Like</button>
+                <button type="submit" class="btn btn-warning" id="unlike-btn">Unlike</button>
               </div>
             </div>
           </div> <!-- form horizontal -->

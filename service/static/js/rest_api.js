@@ -22,8 +22,8 @@ $(function () {
         $("#rec_recommendation_id").val("");
         $("#rec_product_id").val("");
         $("#rec_recommended_product_id").val("");
-        $("#rec_type").val("");
-        $("#rec_liked").val("");
+        $("#rec_type").val("#");
+        $("#rec_liked").val("#");
     }
 
     // Updates the flash message area
@@ -109,6 +109,61 @@ $(function () {
 
     });
 
+    // ****************************************
+    // Like a Recommendation
+    // ****************************************
+
+    $("#like-btn").click(function () {
+
+        let rec_id = $("#rec_recommendation_id").val();
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `/recommendations/${rec_id}/like`,
+                contentType: "application/json",
+                data: ''
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            $("#search_results").empty()
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // ****************************************
+    // Unlike a Recommendation
+    // ****************************************
+
+    $("#unlike-btn").click(function () {
+
+        let rec_id = $("#rec_recommendation_id").val();
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `/recommendations/${rec_id}/unlike`,
+                contentType: "application/json",
+                data: ''
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            $("#search_results").empty()
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
     // ****************************************
     // Retrieve a Recommendation
     // ****************************************
@@ -199,14 +254,14 @@ $(function () {
                 queryString += 'recommended_pid=' + recommended_pid
             }
         }
-        if (type !== null) {
+        if (type !== '#') {
             if (queryString.length > 0) {
                 queryString += '&type=' + type
             } else {
                 queryString += 'type=' + type
             }
         }
-        if (liked !== null) {
+        if (liked !== '#') {
             let liked_val = liked == 'true'
             if (queryString.length > 0) {
                 queryString += '&liked=' + liked_val
@@ -238,7 +293,7 @@ $(function () {
             let firstRec = "";
             for(let i = 0; i < res.length; i++) {
                 let rec = res[i];
-                table +=  `<tr id="row_${i}"><td>${rec.id}</td><td>${rec.pid}</td><td>${rec.recommended_pid}</td><td>${rec.type}</td><td>${rec.liked}</td></tr>`;
+                table +=  `<tr id="row_${i}"><td>ID_${rec.id}</td><td>${rec.pid}</td><td>${rec.recommended_pid}</td><td>${rec.type}</td><td>${rec.liked}</td></tr>`;
                 if (i == 0) {
                     firstRec = rec;
                 }
