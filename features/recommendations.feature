@@ -45,3 +45,23 @@ Scenario: List all recommendations
     And I should see "100" in the results
     And I should see "200" in the results
     And I should not see "999" in the results
+
+Scenario: Read a Recommendation
+    When I visit the "Home Page"
+    And I set the "Product ID" to "400"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "400" in the "Product ID" field
+    And I should see "401" in the results
+    When I copy the "Recommendation ID" field
+    And I press the "Clear" button
+    Then the "Recommendation ID" field should be empty
+    And the "Product ID" field should be empty
+    And the "Recommended product ID" field should be empty
+    When I paste the "Recommendation ID" field
+    And I press the "Retrieve" button
+    Then I should see the message "Success"
+    And I should see "400" in the "Product ID" field
+    And I should see "401" in the "Recommended product ID" field
+    And I should see "Accessory" in the "Type" dropdown
+    And I should see "True" in the "Liked" dropdown
