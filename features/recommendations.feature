@@ -113,3 +113,43 @@ Scenario: Delete a Recommendation
     When I press the "Search" button
     Then I should see the message "Success"
     And I should not see "1000" in the results
+
+Scenario: Update a Recommendation
+    When I visit the "Home Page"
+    And I set the "Product ID" to "2000"
+    And I set the "Recommended product ID" to "2001"
+    And I select "Up sell" in the "Type" dropdown
+    And I select "True" in the "Liked" dropdown
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Recommendation ID" field
+    And I press the "Clear" button
+    Then the "Recommendation ID" field should be empty
+    And the "Product ID" field should be empty
+    And the "Recommended product ID" field should be empty
+    When I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "2000" in the results
+    When I press the "Clear" button
+    Then the "Recommendation ID" field should be empty
+    And the "Product ID" field should be empty
+    And the "Recommended product ID" field should be empty
+    When I paste the "Recommendation ID" field
+    When I press the "Retrieve" button
+    And I should see "2000" in the "Product ID" field
+    And I should see "2001" in the "Recommended product ID" field
+    And I should see "Up sell" in the "Type" dropdown
+    And I should see "True" in the "Liked" dropdown
+    And I set the "Recommended product ID" to "2002"
+    And I select "Cross sell" in the "Type" dropdown
+    When I press the "Update" button
+    Then I should see the message "Success"
+    When I copy the "Recommendation ID" field
+    When I press the "Clear" button
+    When I paste the "Recommendation ID" field
+    When I press the "Retrieve" button
+    And I should see "2000" in the "Product ID" field
+    And I should see "2002" in the "Recommended product ID" field
+    And I should see "Cross sell" in the "Type" dropdown
+    And I should see "True" in the "Liked" dropdown
+
