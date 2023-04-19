@@ -136,19 +136,19 @@ Scenario: Update a Recommendation
     And the "Recommended product ID" field should be empty
     When I paste the "Recommendation ID" field
     When I press the "Retrieve" button
-    And I should see "2000" in the "Product ID" field
+    Then I should see "2000" in the "Product ID" field
     And I should see "2001" in the "Recommended product ID" field
     And I should see "Up sell" in the "Type" dropdown
     And I should see "True" in the "Liked" dropdown
-    And I set the "Recommended product ID" to "2002"
+    When I set the "Recommended product ID" to "2002"
     And I select "Cross sell" in the "Type" dropdown
-    When I press the "Update" button
+    And I press the "Update" button
     Then I should see the message "Success"
     When I copy the "Recommendation ID" field
     When I press the "Clear" button
     When I paste the "Recommendation ID" field
     When I press the "Retrieve" button
-    And I should see "2000" in the "Product ID" field
+    Then I should see "2000" in the "Product ID" field
     And I should see "2002" in the "Recommended product ID" field
     And I should see "Cross sell" in the "Type" dropdown
     And I should see "True" in the "Liked" dropdown
