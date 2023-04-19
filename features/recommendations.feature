@@ -66,6 +66,27 @@ Scenario: Read a Recommendation
     And I should see "Accessory" in the "Type" dropdown
     And I should see "True" in the "Liked" dropdown
 
+Scenario: Search for cross-sell recommendations
+    When I visit the "Home Page"
+    And I select "Cross sell" in the "Type" dropdown
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "100" in the results
+    And I should see "200" in the results
+    And I should not see "300" in the results
+    And I should not see "400" in the results
+
+Scenario: Search for liked recommendations
+    When I visit the "Home Page"
+    And I select "True" in the "liked" dropdown
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "102" in the results
+    And I should see "401" in the results
+    And I should not see "101" in the results
+    And I should not see "201" in the results
+    And I should not see "301" in the results
+
 Scenario: Delete a Recommendation
     When I visit the "Home Page"
     And I set the "Product ID" to "1000"
