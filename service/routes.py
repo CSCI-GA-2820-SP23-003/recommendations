@@ -4,12 +4,13 @@ My Service
 Describe what your service does here
 """
 
-from flask import jsonify, request, url_for, make_response, abort
+from flask import request, abort
+from flask_restx import Resource, fields, reqparse
 from service.common import status  # HTTP Status Codes
 from service.models import Recommendation, RecommendationType
 
 # Import Flask application
-from . import app
+from . import app, init_api
 
 
 ######################################################################
@@ -19,14 +20,11 @@ from . import app
 def index():
     """Base URL for our service"""
     return app.send_static_file("index.html")
-    # return (
-    #     jsonify(
-    #         name="Recommendation REST API Service",
-    #         version="1.0",
-    #         # paths=url_for("list_accounts", _external=True),
-    #     ),
-    #     status.HTTP_200_OK,
-    # )
+
+
+# Note: Delay flask_restx initialization to prevent
+#       conflicting with original Flask handler for '/'
+api = init_api()
 
 
 ######################################################################
@@ -39,6 +37,34 @@ def health():
         {"status": "OK"},
         status.HTTP_200_OK,
     )
+
+
+# Define the model so that the docs reflect what can be sent
+create_model = api.model('Recommendation', {
+    'pid': fields.Integer(required=True, description='Product ID'),
+    'recommended_pid': fields.Integer(required=True, description='Recommended product ID'),
+    'type': fields.String(enum=[member.name for member in RecommendationType], description='Recommendation type'),
+    'liked': fields.Boolean(description='Is the Recommendation liked?'),
+})
+
+recommendation_model = api.inherit(
+    'RecommendationModel',
+    create_model,
+    {
+        'id': fields.Integer(readOnly=True,
+                             description='The unique id assigned internally by service'),
+    }
+)
+
+# query string arguments
+rec_args = reqparse.RequestParser()
+rec_args.add_argument('pid', type=int, location='args', required=False, help='List Recommendations by product ID')
+rec_args.add_argument('recommended_pid', type=int, location='args', required=False,
+                      help='List Recommendations by recommended product ID')
+rec_args.add_argument('type', type=str, location='args', required=False, help='List Recommendations by type')
+rec_args.add_argument('liked', type=str, location='args', required=False, help='List Recommendations by liked')
+rec_args.add_argument('amount', type=int, location='args', required=False,
+                      help='Maximum number of Recommendations to be returned')
 
 
 ######################################################################
@@ -76,183 +102,217 @@ def get_recommendation_based_on_filter(rec_type, liked):
     return recommendations
 
 
-@app.route("/recommendations", methods=["GET"])
-def list_recommendations():
-    """Returns list of the Recommendations"""
-    app.logger.info("Request for Recommendations list")
-
-    rec_type = request.args.get("type", default=None, type=str)
-    liked = request.args.get("liked", default=None, type=str)
-    recommendations = get_recommendation_based_on_filter(rec_type, liked)
-
-    pid = None
-    amount = None
-
-    try:
-        pid = int(request.args.get('pid'))
-    except TypeError:  # pylint: disable=broad-except
-        pass
-
-    try:
-        amount = int(request.args.get('amount'))
-    except TypeError:  # pylint: disable=broad-except
-        pass
-
-    if pid is not None:
-        results = []
-        for recommendation in recommendations:
-            if recommendation.pid == pid:
-                results.append(recommendation.serialize())
-    else:
-        results = [recommendation.serialize() for recommendation in recommendations]
-
-    if amount is not None:
-        # Get top k recommendations (Sort first if adding priority)
-        result = results[0:amount]
-    else:
-        result = results
-
-    return make_response(jsonify(result), status.HTTP_200_OK)
-
-
 ######################################################################
-# RETRIEVE A RECOMMENDATION
+#  PATH: /recommendations
 ######################################################################
-@app.route("/recommendations/<int:recommendation_id>", methods=["GET"])
-def get_recommendation(recommendation_id):
+@api.route('/recommendations', strict_slashes=False)
+class RecommendationCollection(Resource):
     """
-    Retrieve a single Recommendation
-    This endpoint will return a Recommendation based on it's id
+    Handles all interactions with collections of Recommendations
     """
-    app.logger.info("Request for Recommendation with id: %s", recommendation_id)
 
-    # See if the account exists and abort if it doesn't
-    rec = Recommendation.find(recommendation_id)
-    if not rec:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Recommendation with id '{recommendation_id}' could not be found.",
-        )
+    # ------------------------------------------------------------------
+    #  LIST ALL RECOMMENDATIONS
+    # ------------------------------------------------------------------
+    @api.doc('list_recommendations')
+    @api.expect(rec_args, validate=True)
+    @api.marshal_list_with(recommendation_model)
+    def get(self):
+        """Returns list of the Recommendations"""
+        app.logger.info("Request for Recommendations list")
 
-    return make_response(jsonify(rec.serialize()), status.HTTP_200_OK)
+        args = rec_args.parse_args()
+        rec_type = args.get("type")
+        liked = args.get("liked")
+        recommendations = get_recommendation_based_on_filter(rec_type, liked)
 
+        pid = None
+        amount = None
 
-######################################################################
-# CREATE A NEW RECOMMENDATION
-######################################################################
-@app.route("/recommendations", methods=["POST"])
-def create():
-    """ Create a new recommendation """
+        try:
+            pid = int(args.get('pid'))
+        except TypeError:  # pylint: disable=broad-except
+            pass
 
-    app.logger.info("Request to create a Recommendation")
-    check_content_type("application/json")
+        try:
+            amount = int(args.get('amount'))
+        except TypeError:  # pylint: disable=broad-except
+            pass
 
-    # Create the account
-    rec = Recommendation()
-    rec.deserialize(request.get_json())
-    rec.create()
+        if pid is not None:
+            results = []
+            for recommendation in recommendations:
+                if recommendation.pid == pid:
+                    results.append(recommendation.serialize())
+        else:
+            results = [recommendation.serialize() for recommendation in recommendations]
 
-    # Create a message to return
-    message = rec.serialize()
-    location_url = url_for("get_recommendation", recommendation_id=rec.id, _external=True)
+        if amount is not None:
+            # Get top k recommendations (Sort first if adding priority)
+            result = results[0:amount]
+        else:
+            result = results
 
-    return make_response(
-        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
-    )
+        return result, status.HTTP_200_OK
 
+    # ------------------------------------------------------------------
+    #  CREATE A NEW RECOMMENDATION
+    # ------------------------------------------------------------------
+    @api.doc('create_recommendations')
+    @api.response(400, 'The posted data was not valid')
+    @api.expect(create_model)
+    @api.marshal_with(recommendation_model, code=201)
+    def post(self):
+        """ Create a new recommendation """
 
-######################################################################
-# DELETE A RECOMMENDATION
-######################################################################
-@app.route("/recommendations/<int:recommendation_id>", methods=["DELETE"])
-def delelte(recommendation_id):
-    """ Create a new recommendation """
+        app.logger.info("Request to create a Recommendation")
+        check_content_type("application/json")
 
-    app.logger.info("Request to delete a Recommendation")
+        # Create the account
+        rec = Recommendation()
+        rec.deserialize(api.payload)
+        rec.create()
 
-    # Delete the recommendation
-    rec = Recommendation.find(recommendation_id)
-    if rec:
-        rec.delete()
+        # Create a message to return
+        message = rec.serialize()
+        location_url = api.url_for(RecommendationResource, recommendation_id=rec.id, _external=True)
 
-    return make_response("", status.HTTP_204_NO_CONTENT)
-
-
-######################################################################
-# UPDATE A RECOMMENDATION
-######################################################################
-@app.route("/recommendations/<int:recommendation_id>", methods=["PUT"])
-def update(recommendation_id):
-    """ Update a recommendation """
-    app.logger.info("Request to update a Recommendation")
-    check_content_type("application/json")
-
-    rec = Recommendation.find(recommendation_id)
-    if not rec:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Recommendation with id '{recommendation_id}' could not be found.",
-        )
-
-    rec.deserialize(request.get_json())
-    rec.id = recommendation_id
-    rec.update()
-
-    # Create a message to return
-    message = rec.serialize()
-    return make_response(
-        jsonify(message), status.HTTP_200_OK
-    )
+        return message, status.HTTP_201_CREATED, {"Location": location_url}
 
 
 ######################################################################
-# (ACTION) LIKE A RECOMMENDATION
+#  PATH: /recommendations/{id}
 ######################################################################
-@app.route("/recommendations/<int:recommendation_id>/like", methods=["PUT"])
-def like(recommendation_id):
-    """ Like a recommendation """
-    app.logger.info("Request to like a Recommendation")
+@api.route('/recommendations/<recommendation_id>')
+@api.param('recommendation_id', 'The recommendation identifier')
+class RecommendationResource(Resource):
+    """
+    RecommendationResource class
 
-    rec = Recommendation.find(recommendation_id)
-    if not rec:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Recommendation with id '{recommendation_id}' could not be found.",
-        )
+    Allows the manipulation of a single Recommendation
+    GET /recommendations/{id} - Returns a Recommendation with the id
+    PUT /recommendations/{id} - Update a Recommendation with the id
+    DELETE /recommendations/{id} -  Deletes a Recommendation with the id
+    """
 
-    rec.liked = True
-    rec.update()
+    # ------------------------------------------------------------------
+    #  RETRIEVE A RECOMMENDATION
+    # ------------------------------------------------------------------
+    @api.doc('get_recommendations')
+    @api.response(404, 'Recommendation not found')
+    @api.marshal_with(recommendation_model)
+    def get(self, recommendation_id):
+        """
+        Retrieve a single Recommendation
+        This endpoint will return a Recommendation based on it's id
+        """
+        app.logger.info("Request for Recommendation with id: %s", recommendation_id)
 
-    # Create a message to return
-    message = rec.serialize()
-    return make_response(
-        jsonify(message), status.HTTP_200_OK
-    )
+        # See if the account exists and abort if it doesn't
+        rec = Recommendation.find(recommendation_id)
+        if not rec:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Recommendation with id '{recommendation_id}' could not be found.",
+            )
+
+        return rec.serialize(), status.HTTP_200_OK
+
+    # ------------------------------------------------------------------
+    #  UPDATE A RECOMMENDATION
+    # ------------------------------------------------------------------
+    @api.doc('update_recommendations')
+    @api.response(404, 'Recommendation not found')
+    @api.response(400, 'The posted Recommendation data was not valid')
+    @api.expect(recommendation_model)
+    @api.marshal_with(recommendation_model)
+    def put(self, recommendation_id):
+        """ Update a recommendation """
+        app.logger.info("Request to update a Recommendation")
+        check_content_type("application/json")
+
+        rec = Recommendation.find(recommendation_id)
+        if not rec:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Recommendation with id '{recommendation_id}' could not be found.",
+            )
+
+        rec.deserialize(api.payload)
+        rec.id = recommendation_id
+        rec.update()
+        return rec.serialize(), status.HTTP_200_OK
+
+    # ------------------------------------------------------------------
+    #  DELETE A RECOMMENDATION
+    # ------------------------------------------------------------------
+    @api.doc('delete_recommendations')
+    @api.response(204, 'Recommendation deleted')
+    def delete(self, recommendation_id):
+        """ Create a new recommendation """
+
+        app.logger.info("Request to delete a Recommendation")
+
+        # Delete the recommendation
+        rec = Recommendation.find(recommendation_id)
+        if rec:
+            rec.delete()
+            app.logger.info('Recommendation with id [%s] was deleted', recommendation_id)
+
+        return "", status.HTTP_204_NO_CONTENT
 
 
 ######################################################################
-# (ACTION) UNLIKE A RECOMMENDATION
+#  PATH: /recommendations/{id}/like
 ######################################################################
-@app.route("/recommendations/<int:recommendation_id>/unlike", methods=["PUT"])
-def unlike(recommendation_id):
-    """ Unlike a recommendation """
-    app.logger.info("Request to unlike a Recommendation")
+@api.route('/recommendations/<recommendation_id>/like')
+@api.param('recommendation_id', 'The Recommendation identifier')
+class LikeResource(Resource):
+    """ Like actions on a Recommendation """
+    @api.doc('like_recommendations')
+    @api.response(404, 'Recommendation not found')
+    @api.response(409, 'The Recommendation is not available for being liked')
+    def put(self, recommendation_id):
+        """ Like a recommendation """
+        app.logger.info("Request to like a Recommendation")
 
-    rec = Recommendation.find(recommendation_id)
-    if not rec:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Recommendation with id '{recommendation_id}' could not be found.",
-        )
+        rec = Recommendation.find(recommendation_id)
+        if not rec:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Recommendation with id '{recommendation_id}' could not be found.",
+            )
 
-    rec.liked = False
-    rec.update()
+        rec.liked = True
+        rec.update()
+        return rec.serialize(), status.HTTP_200_OK
 
-    # Create a message to return
-    message = rec.serialize()
-    return make_response(
-        jsonify(message), status.HTTP_200_OK
-    )
+
+######################################################################
+#  PATH: /recommendations/{id}/unlike
+######################################################################
+@api.route('/recommendations/<recommendation_id>/unlike')
+@api.param('recommendation_id', 'The Recommendation identifier')
+class UnlikeResource(Resource):
+    """ Unlike actions on a Recommendation """
+    @api.doc('unlike_recommendations')
+    @api.response(404, 'Recommendation not found')
+    @api.response(409, 'The Recommendation is not available for being unliked')
+    def put(self, recommendation_id):
+        """ Unlike a recommendation """
+        app.logger.info("Request to unlike a Recommendation")
+
+        rec = Recommendation.find(recommendation_id)
+        if not rec:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Recommendation with id '{recommendation_id}' could not be found.",
+            )
+
+        rec.liked = False
+        rec.update()
+        return rec.serialize(), status.HTTP_200_OK
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

@@ -6,12 +6,35 @@ and SQL database
 """
 import sys
 from flask import Flask
+from flask_restx import Api
 from service import config
 from service.common import log_handlers
 
 # Create Flask application
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 app.config.from_object(config)
+
+
+######################################################################
+# Configure Swagger before initializing it
+######################################################################
+
+
+def init_api():
+    '''
+    Allowing delayed initialization of the flask_restx API
+    so that non-restx handlers can be defined correctly
+    '''
+    return Api(app,
+               version='1.0.0',
+               title='Recommendation REST API Service',
+               description='This is a Recommendation server.',
+               default='recommendations',
+               default_label='Recommendation operations',
+               doc='/apidocs',
+               )
+
 
 # Dependencies require we import the routes AFTER the Flask app is created
 # pylint: disable=wrong-import-position, wrong-import-order, cyclic-import
