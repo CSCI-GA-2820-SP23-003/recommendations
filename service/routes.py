@@ -5,7 +5,7 @@ Describe what your service does here
 """
 
 from flask import request, abort
-from flask_restx import Resource, fields, reqparse
+from flask_restx import Resource, fields, inputs, reqparse
 from service.common import status  # HTTP Status Codes
 from service.models import Recommendation, RecommendationType
 
@@ -43,7 +43,7 @@ def health():
 create_model = api.model('Recommendation', {
     'pid': fields.Integer(required=True, description='Product ID'),
     'recommended_pid': fields.Integer(required=True, description='Recommended product ID'),
-    'type': fields.String(enum=[member.name for member in RecommendationType], description='Recommendation type'),
+    'type': fields.String(enum=[member.value for member in RecommendationType], description='Recommendation type'),
     'liked': fields.Boolean(description='Is the Recommendation liked?'),
 })
 
@@ -59,10 +59,8 @@ recommendation_model = api.inherit(
 # query string arguments
 rec_args = reqparse.RequestParser()
 rec_args.add_argument('pid', type=int, location='args', required=False, help='List Recommendations by product ID')
-rec_args.add_argument('recommended_pid', type=int, location='args', required=False,
-                      help='List Recommendations by recommended product ID')
 rec_args.add_argument('type', type=str, location='args', required=False, help='List Recommendations by type')
-rec_args.add_argument('liked', type=str, location='args', required=False, help='List Recommendations by liked')
+rec_args.add_argument('liked', type=inputs.boolean, location='args', required=False, help='List Recommendations by liked')
 rec_args.add_argument('amount', type=int, location='args', required=False,
                       help='Maximum number of Recommendations to be returned')
 
@@ -86,13 +84,7 @@ def get_recommendation_based_on_filter(rec_type, liked):
             )
 
     if liked is not None:
-        if liked in set(['true', 'false']):
-            cond_liked = liked == 'true'
-        else:
-            abort(
-                status.HTTP_400_BAD_REQUEST,
-                f"liked = '{liked}' is an invalid liked type.",
-            )
+        cond_liked = liked
 
     if cond_type is None and cond_liked is None:
         recommendations = Recommendation.all()
@@ -116,7 +108,8 @@ class RecommendationCollection(Resource):
     # ------------------------------------------------------------------
     @api.doc('list_recommendations')
     @api.expect(rec_args, validate=True)
-    @api.marshal_list_with(recommendation_model)
+    @api.response(400, 'The query parameter was not valid')
+    @api.marshal_list_with(recommendation_model, code=200)
     def get(self):
         """Returns list of the Recommendations"""
         app.logger.info("Request for Recommendations list")
@@ -183,7 +176,7 @@ class RecommendationCollection(Resource):
 ######################################################################
 #  PATH: /recommendations/{id}
 ######################################################################
-@api.route('/recommendations/<recommendation_id>')
+@api.route('/recommendations/<int:recommendation_id>')
 @api.param('recommendation_id', 'The recommendation identifier')
 class RecommendationResource(Resource):
     """
@@ -224,7 +217,7 @@ class RecommendationResource(Resource):
     @api.doc('update_recommendations')
     @api.response(404, 'Recommendation not found')
     @api.response(400, 'The posted Recommendation data was not valid')
-    @api.expect(recommendation_model)
+    @api.expect(create_model)
     @api.marshal_with(recommendation_model)
     def put(self, recommendation_id):
         """ Update a recommendation """
@@ -239,7 +232,6 @@ class RecommendationResource(Resource):
             )
 
         rec.deserialize(api.payload)
-        rec.id = recommendation_id
         rec.update()
         return rec.serialize(), status.HTTP_200_OK
 
@@ -265,13 +257,14 @@ class RecommendationResource(Resource):
 ######################################################################
 #  PATH: /recommendations/{id}/like
 ######################################################################
-@api.route('/recommendations/<recommendation_id>/like')
+@api.route('/recommendations/<int:recommendation_id>/like')
 @api.param('recommendation_id', 'The Recommendation identifier')
 class LikeResource(Resource):
     """ Like actions on a Recommendation """
     @api.doc('like_recommendations')
     @api.response(404, 'Recommendation not found')
     @api.response(409, 'The Recommendation is not available for being liked')
+    @api.marshal_with(recommendation_model, code=200)
     def put(self, recommendation_id):
         """ Like a recommendation """
         app.logger.info("Request to like a Recommendation")
@@ -291,13 +284,14 @@ class LikeResource(Resource):
 ######################################################################
 #  PATH: /recommendations/{id}/unlike
 ######################################################################
-@api.route('/recommendations/<recommendation_id>/unlike')
+@api.route('/recommendations/<int:recommendation_id>/unlike')
 @api.param('recommendation_id', 'The Recommendation identifier')
 class UnlikeResource(Resource):
     """ Unlike actions on a Recommendation """
     @api.doc('unlike_recommendations')
     @api.response(404, 'Recommendation not found')
     @api.response(409, 'The Recommendation is not available for being unliked')
+    @api.marshal_with(recommendation_model, code=200)
     def put(self, recommendation_id):
         """ Unlike a recommendation """
         app.logger.info("Request to unlike a Recommendation")
