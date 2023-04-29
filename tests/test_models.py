@@ -216,6 +216,25 @@ class TestRecommendation(unittest.TestCase):
         rec = Recommendation()
         self.assertRaises(DataValidationError, rec.deserialize, [])
 
+    def test_deserialize_with_value_error(self):
+        """It should not Deserialize a recommendation with a ValueError"""
+        rec = Recommendation()
+        self.assertRaises(DataValidationError, rec.deserialize, {
+            "pid": 0,
+            "recommended_pid": 0,
+            "type": "not_a_valid_type"
+        })
+
+    def test_deserialize_with_bool_value_error(self):
+        """It should not Deserialize a recommendation with a ValueError"""
+        rec = Recommendation()
+        self.assertRaises(DataValidationError, rec.deserialize, {
+            "pid": 0,
+            "recommended_pid": 0,
+            "type": "default",
+            "liked": "not_bool"
+        })
+
     def test_specific_type_recommendations(self):
         """It should List Recommendations of specific given type in the database"""
         recommendations = Recommendation.find_by_type("cross-sell").all()

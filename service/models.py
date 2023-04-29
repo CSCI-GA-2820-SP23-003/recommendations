@@ -94,8 +94,15 @@ class Recommendation(db.Model):
         try:
             self.pid = data["pid"]
             self.recommended_pid = data["recommended_pid"]
-            self.type = data["type"]
+            self.type = RecommendationType(data["type"])
             self.liked = data.get("liked", False)
+            if not isinstance(self.liked, bool):
+                raise DataValidationError(
+                    "invalid type for boolean [liked]:"
+                    + str(type(self.liked))
+                )
+        except ValueError as error:
+            raise DataValidationError("Invalid value: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Recommendation: missing " + error.args[0]
