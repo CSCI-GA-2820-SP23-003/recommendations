@@ -7,6 +7,11 @@
 [![codecov](https://codecov.io/gh/CSCI-GA-2820-SP23-003/recommendations/branch/master/graph/badge.svg?token=MVEA3AV9VJ)](https://codecov.io/gh/CSCI-GA-2820-SP23-003/recommendations)
 
 
+## Website
+Dev: http://159.122.186.12:31001/
+
+Prod: http://159.122.186.12:31002/
+
 ## Overview
 
 This project is the implementation of the Recommendation service. The `/service` folder contains the `models.py` file for the model and a `routes.py` file for the service. The `/tests` folder has test case starter code for testing the model and the service separately.
