@@ -52,6 +52,7 @@ class TestRecommendationRoutes(TestCase):
     def tearDown(self):
         """ This runs after each test """
         db.session.remove()
+        db.session.close_all()
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
