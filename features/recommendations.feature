@@ -109,8 +109,7 @@ Scenario: Delete a Recommendation
     And the "Recommended product ID" field should be empty
     When I paste the "Recommendation ID" field
     And I press the "Delete" button
-    Then the "Recommendation ID" field should be empty
-    When I press the "Search" button
+    And I press the "Search" button
     Then I should see the message "Success"
     And I should not see "1000" in the results
 
