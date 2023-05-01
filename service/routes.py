@@ -74,7 +74,7 @@ rec_args.add_argument('pid', type=int, location='args', required=False, help='Li
 rec_args.add_argument('type', type=str, location='args', required=False, help='List Recommendations by type')
 rec_args.add_argument('liked', type=inputs.boolean, location='args', required=False, help='List Recommendations by liked')
 rec_args.add_argument('amount', type=int, location='args', required=False,
-                      help='Maximum number of Recommendations to be returned')
+                      help='Maximum number of Recommendations to be returned (default returns all)')
 
 
 ######################################################################
@@ -154,6 +154,11 @@ class RecommendationCollection(Resource):
 
         if amount is not None:
             # Get top k recommendations (Sort first if adding priority)
+            if amount < 0:
+                abort(
+                    status.HTTP_400_BAD_REQUEST,
+                    "'amount' must be a positive integer.",
+                )
             result = results[0:amount]
         else:
             result = results

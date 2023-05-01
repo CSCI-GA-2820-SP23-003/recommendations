@@ -367,3 +367,7 @@ class TestRecommendationRoutes(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 1)
+
+        # Invalid amount
+        resp = self.client.get(BASE_URL+"?amount=-1")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
