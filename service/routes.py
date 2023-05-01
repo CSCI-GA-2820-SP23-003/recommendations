@@ -4,10 +4,10 @@ My Service
 Describe what your service does here
 """
 
-from flask import request, abort
+from flask import abort
 from flask_restx import Resource, fields, inputs, reqparse
 from service.common import status  # HTTP Status Codes
-from service.models import Recommendation, RecommendationType
+from service.models import DataValidationError, Recommendation, RecommendationType
 
 # Import Flask application
 from . import app, init_api
@@ -25,6 +25,18 @@ def index():
 # Note: Delay flask_restx initialization to prevent
 #       conflicting with original Flask handler for '/'
 api = init_api()
+
+
+@api.errorhandler(DataValidationError)
+def request_validation_error(error):
+    """Handles Value Errors from bad data"""
+    message = str(error)
+    app.logger.error(message)
+    return {
+        'status_code': status.HTTP_400_BAD_REQUEST,
+        'error': 'Bad Request',
+        'message': message
+    }, status.HTTP_400_BAD_REQUEST
 
 
 ######################################################################
@@ -159,7 +171,6 @@ class RecommendationCollection(Resource):
         """ Create a new recommendation """
 
         app.logger.info("Request to create a Recommendation")
-        check_content_type("application/json")
 
         # Create the account
         rec = Recommendation()
@@ -222,7 +233,6 @@ class RecommendationResource(Resource):
     def put(self, recommendation_id):
         """ Update a recommendation """
         app.logger.info("Request to update a Recommendation")
-        check_content_type("application/json")
 
         rec = Recommendation.find(recommendation_id)
         if not rec:
@@ -306,20 +316,3 @@ class UnlikeResource(Resource):
         rec.liked = False
         rec.update()
         return rec.serialize(), status.HTTP_200_OK
-
-
-######################################################################
-#  U T I L I T Y   F U N C T I O N S
-######################################################################
-
-
-def check_content_type(media_type):
-    """Checks that the media type is correct"""
-    content_type = request.headers.get("Content-Type")
-    if content_type and content_type == media_type:
-        return
-    app.logger.error("Invalid Content-Type: %s", content_type)
-    abort(
-        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        f"Content-Type must be {media_type}",
-    )
