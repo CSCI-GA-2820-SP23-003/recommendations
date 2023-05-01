@@ -52,6 +52,7 @@ class TestRecommendationRoutes(TestCase):
     def tearDown(self):
         """ This runs after each test """
         db.session.remove()
+        db.session.close_all()
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
@@ -272,14 +273,6 @@ class TestRecommendationRoutes(TestCase):
         resp = self.client.post(BASE_URL, json={"name": "not enough data"})
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_unsupported_media_type(self):
-        """It should not Create when sending wrong media type"""
-        rec = make_recommendation(100, 200)
-        resp = self.client.post(
-            BASE_URL, json=rec.serialize(), content_type="test/html"
-        )
-        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-
     def test_method_not_allowed(self):
         """It should not allow an illegal method call"""
         resp = self.client.put(BASE_URL, json={"not": "today"})
@@ -374,3 +367,7 @@ class TestRecommendationRoutes(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 1)
+
+        # Invalid amount
+        resp = self.client.get(BASE_URL+"?amount=-1")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)

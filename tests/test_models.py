@@ -33,6 +33,7 @@ class TestRecommendation(unittest.TestCase):
     def tearDownClass(cls):
         """ This runs once after the entire test suite """
         db.session.query(Recommendation).delete()
+        db.session.close_all()
 
     def setUp(self):
         """ This runs before each test """
@@ -127,9 +128,6 @@ class TestRecommendation(unittest.TestCase):
 
         # Assert that there are 5*3=15 recommendations in the database
         all_rec = Recommendation.all()
-        print("==========")
-        print(all_rec)
-        print("==========")
         self.assertEqual(len(all_rec), 15)
 
         # each pid has 3 recommended pids
